@@ -11,7 +11,9 @@
   "author": "Andres Zuñiga (https:github.com/Zuniga63)",
   "license": "ISC",
   "dependencies": {
-    "express": "4.18.1"
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "mongoose": "^6.3.4"
   },
   "devDependencies": {
     "nodemon": "2.0.16",
