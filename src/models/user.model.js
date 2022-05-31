@@ -36,8 +36,8 @@ const userSchema = new Schema(
         "Debe ser de minimo 8 caracteres, alphanumerico y tener un caracter especial",
       ],
     },
-    coments: {
-      type: [{ type: Schema.Types.ObjectId, ref: "Coment" }],
+    comments: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     },
   },
   {

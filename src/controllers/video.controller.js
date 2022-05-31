@@ -1,4 +1,5 @@
 const Video = require("../models/video.model");
+const User = require ("../models/user.model");
 
 module.exports = {
 
@@ -16,6 +17,7 @@ module.exports = {
     const { videoId } = req.params;
 
     Video.findById(videoId)
+      .populate("userId", "name email")
       .then((video) => {
         res.status(200).json({ message: "Video found", data: video });
       })
@@ -24,20 +26,19 @@ module.exports = {
       });
   },
 
-  create(req, res) {
-    const data = req.body;
-    const newVideo = {
-      ...data,
-    };
-    Video.create(newVideo)
-      .then((video) => {
-        res.status(201).json({ message: "Video created", data: video });
-      })
-      .catch((err) => {
-        res
-          .status(400)
-          .json({ message: "Video could not be created", data: err });
-      });
+  async create(req, res) {
+    try {
+      const { userId } = req.body;
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error("Invalid user");
+      }
+      const video = await Video.create({ ...req.body });
+      res.status(201).json(video);
+
+    }catch (err){
+      res.status(400).json(err);
+    }
   },
 
   update(req, res) {

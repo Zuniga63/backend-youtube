@@ -3,7 +3,7 @@ const cors = require("cors");
 const { connect } = require("./src/db");
 const videoRouter = require("./src/routes/video");
 const userRouter = require("./src/routes/user");
-const comentRouter = require("./src/routes/coment");
+const comentRouter = require("./src/routes/comment");
 
 const app = express();
 const port = 8080;
