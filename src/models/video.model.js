@@ -1,4 +1,3 @@
-
 const { Schema, model } = require("mongoose");
 
 const videoSchema = new Schema(
