@@ -7,10 +7,6 @@ const videoSchema = new Schema(
     url: String,
     visits: Number,
     labels: [String],
-    coments: {
-      type: Schema.Types.ObjectId,
-      ref: "Coment",
-    },
   },
   {
     timestamps: true,
