@@ -1,4 +1,4 @@
-const Coment = require("../models/comment.model");
+const Comment = require("../models/comment.model");
 const User = require("../models/user.model");
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
   show(req, res) {
     const { commentId } = req.params;
 
-    Coment.findById(commentId)
+    Comment.findById(commentId)
       .then((comment) => {
         res.status(200).json({ message: "comment found", data: comment });
       })
@@ -42,7 +42,7 @@ module.exports = {
   update(req, res) {
     const { commentId } = req.params;
 
-    Coment.findByIdAndUpdate(commentId, req.body, { new: true })
+    Comment.findByIdAndUpdate(commentId, req.body, { new: true })
       .then((comment) => {
         res.status(200).json({ message: "Comment updated", data: comment });
       })
@@ -56,7 +56,7 @@ module.exports = {
   destroy(req, res) {
     const { commentId } = req.params;
 
-    Coment.findByIdAndDelete(commentId)
+    Comment.findByIdAndDelete(commentId)
       .then((comment) => {
         res.status(200).json({ message: "comment deleted", data: comment });
       })
