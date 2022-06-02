@@ -16,7 +16,11 @@ module.exports = {
       const { videoId } = req.params;
       const video = await Video.findById(videoId)
         .populate("userId", "name email avatar")
-        .populate("comments", "commentBody");
+        .populate({
+          path: "comments",
+          select: "commentBody",
+          populate: { path: "userId", select:"name avatar" },
+        });
       res.status(200).json({ message: "Video found", data: video });
     } catch (err) {
       res.status(404).json({ message: "Video not found", data: err });
@@ -55,7 +59,7 @@ module.exports = {
   async destroy(req, res) {
     try {
       const { videoId } = req.params;
-      const video = await Video.findByIdAndDelete(videoId);
+      const video = await Video.deleteOne({_id:videoId});
       res.status(200).json({ message: "video deleted", data: video });
     } catch (err) {
       res

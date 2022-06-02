@@ -5,17 +5,12 @@ const Video = require("../models/video.model");
 module.exports = {
   async create(req, res) {
     try {
-      const { userId, videoId } = req.body;
+      const { videoId } = req.body;
       const comment = await Comment.create({ ...req.body });
-
-      const user = await User.findById(userId);
-      user.comments.push(comment);
 
       const video = await Video.findById(videoId);
       video.comments.push(comment);
-
       video.save({ validateBeforeSave: false });
-      user.save({ validateBeforeSave: false });
 
       res.status(201).json(comment);
     } catch (err) {
@@ -26,7 +21,21 @@ module.exports = {
   async destroy(req, res) {
     try {
       const { commentId } = req.params;
-      const comment = await Comment.findById(commentId).remove();
+      const {videoId, userId} =req.body;
+
+      const userIdComment = await Comment.findById(commentId)
+
+      if (userIdComment.userId.toString() !== userId){
+        res.status(403).json({message:"User no authorizes"})
+        return
+      }
+      const comment = await Comment.findByIdAndDelete(commentId);
+
+      const video = await Video.findById(videoId);
+
+      video.comments = video.comments.filter ((item) => item._id.toString() !== commentId)
+      video.save({ validateBeforeSave: false });
+
       res.status(200).json({ message: "comment deleted", data: comment });
     } catch (err) {
       res
