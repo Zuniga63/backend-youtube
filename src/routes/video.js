@@ -7,4 +7,4 @@ router.route("/").post(videoController.create);
 router.route("/:videoId").put(videoController.update);
 router.route("/:videoId").delete(videoController.destroy);
 
-module.exports =router;
+module.exports = router;

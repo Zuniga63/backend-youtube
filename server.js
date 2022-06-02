@@ -14,7 +14,7 @@ app.use(cors());
 
 app.use("/videos", videoRouter);
 app.use("/users", userRouter);
-app.use("/comments", comentRouter);
+app.use("/videos/comments/", comentRouter);
 
 app.listen(port, () => {
   console.log(`Successfully run in port: http:localhost:${port}`);

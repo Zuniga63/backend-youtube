@@ -2,15 +2,17 @@ const { Schema, model } = require("mongoose");
 
 const commentsSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    videoId: String,
-    body: String,
-    likes: Array,
-    replies: Array,
+    videoId: {
+      type: Schema.Types.ObjectId,
+      ref: "Video",
+      required: true,
+    },
+    commentBody: String,
   },
   {
     timestamps: true,
