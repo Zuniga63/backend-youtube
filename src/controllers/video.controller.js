@@ -29,12 +29,12 @@ module.exports = {
 
   async create(req, res) {
     try {
-      const { userId } = req.body;
+      const userId  = req.user;
       const user = await User.findById(userId);
       if (!user) {
         throw new Error("Invalid user");
       }
-      const video = await Video.create({ ...req.body });
+      const video = await Video.create({ ...req.body, userId });
       res.status(201).json(video);
     } catch (err) {
       res.status(400).json(err);

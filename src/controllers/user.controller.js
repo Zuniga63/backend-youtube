@@ -24,11 +24,17 @@ module.exports = {
 
   async signup(req, res) {
     try {
-      const { password } = req.body;
+      const { password, name } = req.body;
+      let { avatar } = req.body;
       const encPassword = await bcrypt.hash(password, 8);
 
-      const user = await User.create({ ...req.body, password: encPassword });
-      console.log(user)
+      if(!avatar){
+        const uri ="https://ui-avatars.com/api/?background=random"
+        const avatarName = name.replace(" ", "+");
+        avatar = `${uri}&name=${avatarName}`
+      }
+      const user = await User.create({ ...req.body, password: encPassword, avatar });
+
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
         expiresIn: 60 * 60 * 24,
       });
