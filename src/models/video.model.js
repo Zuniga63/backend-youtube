@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const Comments = require ("../models/comment.model")
 
 const videoSchema = new Schema(
   {
@@ -21,6 +22,18 @@ const videoSchema = new Schema(
   }
 );
 
+//middleware to delete comments from the collections comments of the deleted video
+videoSchema.pre("deleteOne", async function (next) {
+  try {
+    await Comments.deleteMany({videoId:this.getFilter()["_id"]})
+    next()
+  }catch (err){
+    next(err)
+  }
+} )
+
 const Video = model("Video", videoSchema);
+
+
 
 module.exports = Video;
