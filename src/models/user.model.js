@@ -5,6 +5,7 @@ const emailRegex = new RegExp("^[^@]+@[^@]+.[^@]+$"); // simply email validation
 const passwordRegex = new RegExp(
   "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$"
 ); // Minimum 8 characters, has to be Alphanumeric and at least 1 special character
+
 const userSchema = new Schema(
   {
     name: {
@@ -31,16 +32,13 @@ const userSchema = new Schema(
     password: {
       required: true,
       type: String,
-      match: [
-        passwordRegex,
-        "Debe ser de minimo 8 caracteres, alphanumerico y tener un caracter especial",
-      ],
     },
   },
   {
     timestamps: true,
   }
 );
+
 
 const User = model("User", userSchema);
 

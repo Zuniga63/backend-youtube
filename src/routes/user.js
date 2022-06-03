@@ -3,7 +3,10 @@ const userControllers = require("../controllers/user.controller");
 
 router.route("/").get(userControllers.list);
 router.route("/:userId").get(userControllers.show);
-router.route("/").post(userControllers.create);
+
+router.route("/signup").post(userControllers.signup);
+router.route("/signin").post(userControllers.signin);
+
 router.route("/:userId").put(userControllers.update);
 router.route("/:userId").delete(userControllers.destroy);
 
