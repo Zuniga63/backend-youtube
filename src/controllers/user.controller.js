@@ -24,30 +24,37 @@ module.exports = {
 
   async signup(req, res) {
     try {
-      const { password, name } = req.body;
+      const { password, confirmPassword, firstName, lastName } = req.body;
       let { avatar } = req.body;
+
+      if (password !== confirmPassword) {
+        res.status(403).json({ message: "Contraseñas no coinciden" });
+        return;
+      }
       const encPassword = await bcrypt.hash(password, 8);
 
-      if(!avatar){
-        const uri ="https://ui-avatars.com/api/?background=random"
-        const avatarName = name.replace(" ", "+");
-        avatar = `${uri}&name=${avatarName}`
+      if (!avatar) {
+        const uri = "https://ui-avatars.com/api/?background=random";
+        const avatarName = `${firstName}+${lastName}`.replace(" ", "+");
+        avatar = `${uri}&name=${avatarName}`;
       }
-      const user = await User.create({ ...req.body, password: encPassword, avatar });
+      const user = await User.create({
+        ...req.body,
+        password: encPassword,
+        avatar,
+      });
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
         expiresIn: 60 * 60 * 24,
       });
-      
+
       res.status(201).json({
         message: "User created",
-        data: {
-          token: token,
-          user: {
-            name: user.name,
-            avatar: user.avatar,
-            email: user.email,
-          },
+        token: token,
+        user: {
+          name: user.name,
+          avatar: user.avatar,
+          email: user.email,
         },
       });
     } catch (err) {
@@ -57,17 +64,17 @@ module.exports = {
 
   async signin(req, res) {
     try {
-      const {email,  password } = req.body;
+      const { email, password } = req.body;
 
-      const user = await User.findOne({email})
+      const user = await User.findOne({ email });
 
-      if(!user) {
+      if (!user) {
         throw new Error("Usuario o contraseña invalida");
       }
-      
+
       const isValid = await bcrypt.compare(password, user.password);
 
-      if (!isValid){
+      if (!isValid) {
         throw new Error("Usuario o contraseña invalida");
       }
 
@@ -77,13 +84,11 @@ module.exports = {
 
       res.status(201).json({
         message: "User login",
-        data: {
-          token: token,
-          user: {
-            name: user.name,
-            avatar: user.avatar,
-            email: user.email,
-          },
+        token: token,
+        user: {
+          name: user.name,
+          avatar: user.avatar,
+          email: user.email,
         },
       });
     } catch (err) {
@@ -93,7 +98,7 @@ module.exports = {
 
   async update(req, res) {
     try {
-      const { userId } = req.params;
+      const  userId  = req.user;
       const user = await User.findByIdAndUpdate(userId, req.body, {
         new: true,
       });
@@ -105,10 +110,11 @@ module.exports = {
 
   async destroy(req, res) {
     try {
-      const { userId } = req.params;
+      const  userId  = req.user;
 
-      const user = await User.findByIdAndDelete(userId);
-      res.status(200).json({ message: "User deleted", data: user });
+      const userDeleted = await User.findByIdAndDelete(userId);
+      res.status(200).json({ message: "User deleted", data: userDeleted });
+
     } catch (err) {
       res.status(400).json({ message: "User could not be deleted", data: err });
     }

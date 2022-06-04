@@ -8,7 +8,12 @@ const passwordRegex = new RegExp(
 
 const userSchema = new Schema(
   {
-    name: {
+    firstName: {
+      required: true,
+      type: String,
+      match: [nameRegex, "Nombre no debe contener numeros"],
+    },
+    lastName: {
       required: true,
       type: String,
       match: [nameRegex, "Nombre no debe contener numeros"],
@@ -30,6 +35,10 @@ const userSchema = new Schema(
       ],
     },
     password: {
+      required: true,
+      type: String,
+    },
+    confirmPassword: {
       required: true,
       type: String,
     },
