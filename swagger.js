@@ -16,6 +16,10 @@ module.exports = {
       name: "label",
       description: "Este endpoint maneja toda la informacion relacionada con las etiquetas usadas en los videos.",
     },
+    {
+      name: "video",
+      description: "Endpoint encargado de la información relacionada con los videos en la base de datos.",
+    },
   ],
   paths: {
     "/label": {
@@ -148,6 +152,43 @@ module.exports = {
         },
       },
     },
+    "/video": {
+      post: {
+        tags: ["video"],
+        summary: "Guarda la información de un nuevo video en la BD.",
+        produces: ["application/json"],
+        parameters: [
+          {
+            name: "Authentication",
+            in: "header",
+            description: "Token de autorización.",
+            required: true,
+            schema: {
+              type: "string",
+              example:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY",
+            },
+          },
+          {
+            name: "body",
+            in: "body",
+            description: "Cuerpo de los datos para crear un nuevo video.",
+            required: true,
+            schema: {
+              $ref: "#/definitions/VideoCreateRequest",
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: "OK",
+            schema: {
+              $ref: "#/definitions/Video",
+            },
+          },
+        },
+      },
+    },
   },
   definitions: {
     labelPost: {
@@ -268,6 +309,36 @@ module.exports = {
           format: "date-time",
         },
       },
+    },
+    VideoCreateRequest: {
+      type: "object",
+      properties: {
+        title: {
+          type: "string",
+          example: "Manual para dormir",
+          required: true,
+        },
+        description: {
+          type: "string",
+          example: "La forma correcta de dormir cada noche, no se olviden mirar antes el video de como despertarse.",
+        },
+        video: {
+          type: "string",
+          format: "binary",
+        },
+        image: {
+          type: "string",
+          format: "binary",
+        },
+        labels: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+          example: ["Etiqueta 1", "Etiqueta 2"],
+        },
+      },
+      required: ["title", "description", "video", "image"],
     },
   },
 };
