@@ -3,7 +3,7 @@ const {userAuth} = require ("../middlewares/userAuth.middleware")
 const userControllers = require("../controllers/user.controller");
 
 router.route("/").get(userControllers.list);
-router.route("/:userId").get(userControllers.show);
+router.route("/profile").get(userAuth, userControllers.show);
 
 router.route("/signup").post(userControllers.signup);
 router.route("/signin").post(userControllers.signin);

@@ -52,7 +52,7 @@ module.exports = {
 
       //Se crean o se recuperan las instancias de labels
       if (labelNames && labelNames.length > 0) {
-        console.log("Aqui");
+
         for (let index = 0; index < labelNames.length; index++) {
           const name = labelNames[index];
           const slug = createSlug(name);
@@ -82,7 +82,6 @@ module.exports = {
       }
       res.status(201).json(info);
     } catch (err) {
-      console.log(err);
       res.status(502).json(err);
     }
   },
@@ -147,7 +146,6 @@ module.exports = {
 
       res.status(200).json({ message: "video Deleted", video, labelUpdates });
     } catch (error) {
-      console.log(error);
       res.status(502).json(error);
     }
   },
