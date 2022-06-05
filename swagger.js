@@ -189,7 +189,111 @@ module.exports = {
         },
       },
     },
-  },
+    "/video/{videoId}/new-like": {
+      post: {
+        tags: ["video"],
+        summary: "Crea un nuevo documento de videoLike si no existe en la BD",
+        produces: ["application/json"],
+        parameters: [
+          {
+            name: "Authentication",
+            in: "header",
+            description: "Token de autorización.",
+            required: true,
+            schema: {
+              type: "string",
+              example:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY",
+            },
+          },
+          {
+            name: "videoId",
+            in: "path",
+            description: "ID del video a agregar el like.",
+            required: true,
+          },
+        ],
+        responses: {
+          200: {
+            description: "El like ya existe y no se realiza ninguna acción adicional.",
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "OK",
+                },
+              },
+            },
+          },
+          201: {
+            description: "El like no existía y se crea un nuevo documento.",
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "OK",
+                },
+              },
+            },
+          },
+          404: {
+            description: "Si no se encuentra el usuario o el video",
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "Usuario no encontrado",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/video/{videoId}/remove-like": {
+      delete: {
+        tags: ["video"],
+        summary: "Elimina el registro con el like del usuario.",
+        produces: ["application/json"],
+        parameters: [
+          {
+            name: "Authentication",
+            in: "header",
+            description: "Token de autorización.",
+            required: true,
+            schema: {
+              type: "string",
+              example:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY",
+            },
+          },
+          {
+            name: "videoId",
+            in: "path",
+            description: "ID del video a agregar el like.",
+            required: true,
+          },
+        ],
+        responses: {
+          200: {
+            description: "Cuando se elimina correctamente el documento.",
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "OK",
+                },
+              },
+            }, //.end schema
+          },
+        }, //.end responses
+      }, //.end delete
+    }, //.end route path
+  }, //.end path
   definitions: {
     labelPost: {
       type: "object",
