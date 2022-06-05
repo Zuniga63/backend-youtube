@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger");
 require("dotenv").config();
+
 const { connect } = require("./src/db");
 const videoRouter = require("./src/routes/video");
 const userRouter = require("./src/routes/user");
@@ -18,7 +21,9 @@ app.use(cors());
 app.use("/videos", videoRouter);
 app.use("/users", userRouter);
 app.use("/videos/comments/", comentRouter);
-app.use("/labels", labelRouter);
+app.use("/label", labelRouter);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
   console.log(`App running in ${host}:${port}`);
