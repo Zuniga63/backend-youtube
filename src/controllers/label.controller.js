@@ -25,7 +25,7 @@ module.exports = {
       const label = await Label.create({ name, slug });
       res.status(201).json({ message: "Label was create", label });
     } catch (error) {
-      console.log(error);
+
       res.status(502).json(error);
     }
   },
@@ -90,7 +90,6 @@ module.exports = {
         return;
       }
 
-      console.log(label);
 
       //Ahora se elimina la realción de los videos
       for (let index = 0; index < label.videos.length; index++) {

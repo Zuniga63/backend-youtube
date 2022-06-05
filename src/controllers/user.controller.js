@@ -14,9 +14,9 @@ module.exports = {
 
   async show(req, res) {
     try {
-      const { userId } = req.params;
+      const  userId  = req.user;
       const user = await User.findById(userId);
-      res.status(200).json({ message: "User found", data: user });
+      res.status(200).json({ message: "User found",  user });
     } catch (err) {
       res.status(404).json({ message: "User not found", data: err });
     }
@@ -28,8 +28,7 @@ module.exports = {
       let { avatar } = req.body;
 
       if (password !== confirmPassword) {
-        res.status(403).json({ message: "Contraseñas no coinciden" });
-        return;
+        return res.status(403).json({ message: "Contraseñas no coinciden" });
       }
       const encPassword = await bcrypt.hash(password, 8);
 
@@ -63,6 +62,7 @@ module.exports = {
   },
 
   async signin(req, res) {
+
     try {
       const { email, password } = req.body;
 
