@@ -38,7 +38,14 @@ module.exports = {
         return;
       }
 
-      await VideoLike.create({ userId: user, videoId: video });
+      const like = await VideoLike.create({ userId: user, videoId: video });
+
+      //Se agrega los likes a las instancias
+      video.likes.push(like);
+      user.likes.push(like);
+
+      await video.save({ validateBeforeSave: false });
+      await user.save({ validateBeforeSave: false });
       res.status(201).json({ message: "OK" });
     } catch (error) {
       console.log(error);
