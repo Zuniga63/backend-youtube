@@ -1,12 +1,12 @@
-const { Schema, model } = require("mongoose");
-const Comment = require("../models/comment.model");
-const VideoLike = require("./videoLike.model");
+const { Schema, model } = require('mongoose');
+const Comment = require('./comment.model');
+const VideoLike = require('./videoLike.model');
 
 const videoSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     title: String,
@@ -14,12 +14,12 @@ const videoSchema = new Schema(
     videoUrl: String,
     imageUrl: String,
     visits: Number,
-    labels: [{ type: Schema.Types.ObjectId, ref: "Label" }],
+    labels: [{ type: Schema.Types.ObjectId, ref: 'Label' }],
     comments: {
-      type: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+      type: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     },
     likes: {
-      type: [{ type: Schema.Types.ObjectId, ref: "VideoLike" }],
+      type: [{ type: Schema.Types.ObjectId, ref: 'VideoLike' }],
     },
   },
   {
@@ -27,10 +27,10 @@ const videoSchema = new Schema(
   }
 );
 
-//middleware to delete comments from the collections comments of the deleted video
-videoSchema.pre("deleteOne", async function (next) {
+// middleware to delete comments from the collections comments of the deleted video
+videoSchema.pre('deleteOne', async function (next) {
   try {
-    const videoId = this.getFilter()["_id"];
+    const { _id: videoId } = this.getFilter();
     await Comment.deleteMany({ videoId });
     await VideoLike.deleteMany({ videoId });
     next();
@@ -39,6 +39,6 @@ videoSchema.pre("deleteOne", async function (next) {
   }
 });
 
-const Video = model("Video", videoSchema);
+const Video = model('Video', videoSchema);
 
 module.exports = Video;
