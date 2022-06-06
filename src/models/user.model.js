@@ -44,6 +44,28 @@ const userSchema = new Schema(
   }
 );
 
+userSchema
+  .virtual("fullName")
+  .get(function () {
+    return this.firstName + " " + this.lastName;
+  })
+  .set(function (fullName) {
+    const [firstName, lastName] = fullName.split(" ");
+    this.firstName = firstName;
+    this.lastName = lastName;
+  });
+
+userSchema.virtual("avatarUrl").get(function () {
+  const { firstName, lastName } = this;
+  if (!this.avatar) {
+    const uri = "https://ui-avatars.com/api/?background=random";
+    const avatarName = `${firstName}+${lastName}`.replaceAll(" ", "+");
+    return `${uri}&name=${avatarName}`;
+  }
+
+  return this.avatar;
+});
+
 const User = model("User", userSchema);
 
 module.exports = User;
