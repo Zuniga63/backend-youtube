@@ -1,10 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger");
 require("dotenv").config();
 
+const mongoose = require("mongoose");
 const { connect } = require("./src/db");
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger");
+
 const videoRouter = require("./src/routes/video");
 const userRouter = require("./src/routes/user");
 const comentRouter = require("./src/routes/comment");
@@ -14,6 +17,8 @@ const videoLikeRouter = require("./src/routes/videoLike");
 const app = express();
 const port = process.env.APP_PORT;
 const host = process.env.APP_URL;
+
+mongoose.set("toJSON", { virtuals: true });
 connect();
 
 app.use(express.json());
