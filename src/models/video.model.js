@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const Comment = require("../models/comment.model");
+const VideoLike = require("./videoLike.model");
 
 const videoSchema = new Schema(
   {
@@ -17,6 +18,9 @@ const videoSchema = new Schema(
     comments: {
       type: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     },
+    likes: {
+      type: [{ type: Schema.Types.ObjectId, ref: "VideoLike" }],
+    },
   },
   {
     timestamps: true,
@@ -26,7 +30,9 @@ const videoSchema = new Schema(
 //middleware to delete comments from the collections comments of the deleted video
 videoSchema.pre("deleteOne", async function (next) {
   try {
-    await Comment.deleteMany({ videoId: this.getFilter()["_id"] });
+    const videoId = this.getFilter()["_id"];
+    await Comment.deleteMany({ videoId });
+    await VideoLike.deleteMany({ videoId });
     next();
   } catch (err) {
     next(err);
