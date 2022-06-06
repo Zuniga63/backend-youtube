@@ -3,6 +3,7 @@ const User = require("../models/user.model");
 const { request, response } = require("express");
 const { createSlug } = require("../utils/labelUtils");
 const Label = require("../models/label.model");
+const VideoLike = require("../models/videoLike.model");
 
 module.exports = {
   async list(req, res) {
@@ -14,19 +15,51 @@ module.exports = {
     }
   },
 
+  /**
+   * ! Se necesita agregar un midleware para recuperar el id
+   * @param {request} req
+   * @param {response} res
+   */
   async show(req, res) {
     try {
       const { videoId } = req.params;
+      const userId = req.user;
+      let userLikeVideo = false;
+
+      //Se recupera el video
       const video = await Video.findById(videoId)
         .populate("userId", "name email avatar")
         .populate({
           path: "comments",
           select: "commentBody",
           populate: { path: "userId", select: "name avatar" },
-        });
-      res.status(200).json({ message: "Video found", data: video });
+        })
+        .select("-labels");
+
+      if (!video) {
+        res.status(404).json({ message: "video not found." });
+        return;
+      }
+
+      /**
+       * ! Se necesita agregar un midleware para recuperar el id
+       * ! del usuario sin tener que estar validando.
+       * ! Este codigo no funciona de momento.
+       */
+      if (userId) {
+        if (await VideoLike.exists({ userId, videoId: video._id })) {
+          userLikeVideo = true;
+        }
+      }
+
+      /**
+       * * Unica forma que encontre para gregar esas dos proiedades.
+       */
+      const videoData = { ...video.toObject(), likes: video.likes.length, userLikeVideo };
+
+      res.status(200).json({ message: "Video found", video: videoData });
     } catch (err) {
-      res.status(404).json({ message: "Video not found", data: err });
+      res.status(500).json({ message: "Internal server Error.", data: err.message });
     }
   },
 
@@ -52,7 +85,6 @@ module.exports = {
 
       //Se crean o se recuperan las instancias de labels
       if (labelNames && labelNames.length > 0) {
-        console.log("Aqui");
         for (let index = 0; index < labelNames.length; index++) {
           const name = labelNames[index];
           const slug = createSlug(name);
@@ -82,7 +114,6 @@ module.exports = {
       }
       res.status(201).json(info);
     } catch (err) {
-      console.log(err);
       res.status(502).json(err);
     }
   },
@@ -147,7 +178,6 @@ module.exports = {
 
       res.status(200).json({ message: "video Deleted", video, labelUpdates });
     } catch (error) {
-      console.log(error);
       res.status(502).json(error);
     }
   },

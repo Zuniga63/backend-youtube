@@ -1,28 +1,25 @@
-const { Schema, model, models } = require("mongoose");
+const { Schema, model, models } = require('mongoose');
 
-const nameRegex = new RegExp("[a-zA-Z]+"); //Just letters
-const emailRegex = new RegExp("^[^@]+@[^@]+.[^@]+$"); // simply email validation
-const passwordRegex = new RegExp(
-  "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$"
-); // Minimum 8 characters, has to be Alphanumeric and at least 1 special character
+const nameRegex = /[a-zA-Z]+/; // Just letters
+const emailRegex = /^[^@]+@[^@]+.[^@]+$/; // simply email validation
 
 const userSchema = new Schema(
   {
     firstName: {
       required: true,
       type: String,
-      match: [nameRegex, "Nombre no debe contener numeros"],
+      match: [nameRegex, 'Nombre no debe contener numeros'],
     },
     lastName: {
       required: true,
       type: String,
-      match: [nameRegex, "Nombre no debe contener numeros"],
+      match: [nameRegex, 'Nombre no debe contener numeros'],
     },
     avatar: String,
     email: {
       type: String,
       required: true,
-      match: [emailRegex, "Email Invalido"],
+      match: [emailRegex, 'Email Invalido'],
       validate: [
         {
           validator(value) {
@@ -30,7 +27,7 @@ const userSchema = new Schema(
               .then((user) => !user)
               .catch(() => false);
           },
-          message: "Ya existe un usuario registrado con ese correo",
+          message: 'Ya existe un usuario registrado con ese correo',
         },
       ],
     },
@@ -38,9 +35,8 @@ const userSchema = new Schema(
       required: true,
       type: String,
     },
-    confirmPassword: {
-      required: true,
-      type: String,
+    likes: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'VideoLike' }],
     },
   },
   {
@@ -48,7 +44,29 @@ const userSchema = new Schema(
   }
 );
 
+userSchema
+  .virtual('fullName')
+  .get(function () {
+    const { firstName, lastName } = this;
+    return `${firstName} ${lastName}`;
+  })
+  .set(function (fullName) {
+    const [firstName, lastName] = fullName.split(' ');
+    this.firstName = firstName;
+    this.lastName = lastName;
+  });
 
-const User = model("User", userSchema);
+userSchema.virtual('avatarUrl').get(function () {
+  const { firstName, lastName } = this;
+  if (!this.avatar) {
+    const uri = 'https://ui-avatars.com/api/?background=random';
+    const avatarName = `${firstName}+${lastName}`.replaceAll(' ', '+');
+    return `${uri}&name=${avatarName}`;
+  }
+
+  return this.avatar;
+});
+
+const User = model('User', userSchema);
 
 module.exports = User;

@@ -14,9 +14,9 @@ module.exports = {
 
   async show(req, res) {
     try {
-      const { userId } = req.params;
+      const userId = req.user;
       const user = await User.findById(userId);
-      res.status(200).json({ message: "User found", data: user });
+      res.status(200).json({ message: "User found", user });
     } catch (err) {
       res.status(404).json({ message: "User not found", data: err });
     }
@@ -28,16 +28,10 @@ module.exports = {
       let { avatar } = req.body;
 
       if (password !== confirmPassword) {
-        res.status(403).json({ message: "Contraseñas no coinciden" });
-        return;
+        return res.status(403).json({ message: "Contraseñas no coinciden" });
       }
       const encPassword = await bcrypt.hash(password, 8);
 
-      if (!avatar) {
-        const uri = "https://ui-avatars.com/api/?background=random";
-        const avatarName = `${firstName}+${lastName}`.replace(" ", "+");
-        avatar = `${uri}&name=${avatarName}`;
-      }
       const user = await User.create({
         ...req.body,
         password: encPassword,
@@ -98,7 +92,7 @@ module.exports = {
 
   async update(req, res) {
     try {
-      const  userId  = req.user;
+      const userId = req.user;
       const user = await User.findByIdAndUpdate(userId, req.body, {
         new: true,
       });
@@ -110,11 +104,10 @@ module.exports = {
 
   async destroy(req, res) {
     try {
-      const  userId  = req.user;
+      const userId = req.user;
 
       const userDeleted = await User.findByIdAndDelete(userId);
       res.status(200).json({ message: "User deleted", data: userDeleted });
-
     } catch (err) {
       res.status(400).json({ message: "User could not be deleted", data: err });
     }
