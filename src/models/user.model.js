@@ -2,9 +2,6 @@ const { Schema, model, models } = require("mongoose");
 
 const nameRegex = new RegExp("[a-zA-Z]+"); //Just letters
 const emailRegex = new RegExp("^[^@]+@[^@]+.[^@]+$"); // simply email validation
-const passwordRegex = new RegExp(
-  "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$"
-); // Minimum 8 characters, has to be Alphanumeric and at least 1 special character
 
 const userSchema = new Schema(
   {
@@ -38,16 +35,14 @@ const userSchema = new Schema(
       required: true,
       type: String,
     },
-    confirmPassword: {
-      required: true,
-      type: String,
+    likes: {
+      type: [{ type: Schema.Types.ObjectId, ref: "VideoLike" }],
     },
   },
   {
     timestamps: true,
   }
 );
-
 
 const User = model("User", userSchema);
 
