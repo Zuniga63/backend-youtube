@@ -189,6 +189,52 @@ module.exports = {
         },
       },
     },
+    "/video/{videoId}": {
+      get: {
+        tags: ["video"],
+        summary: "Recuepera la informacion de un video de la BD.",
+        produces: ["application/json"],
+        parameters: [
+          {
+            name: "Authentication",
+            in: "header",
+            description: "Token de autorización pasado a la ruta pero no obligatorio.",
+            required: false,
+            schema: {
+              type: "string",
+              example:
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY",
+            },
+          },
+          {
+            name: "videoId",
+            in: "path",
+            description: "ID del video a agregar el like.",
+            required: true,
+          },
+        ],
+        responses: {
+          200: {
+            description: "El video existe y no hubo problemas al recuperar la información.",
+            schema: {
+              $ref: "#/definitions/showVideoResponse",
+            },
+          },
+          404: {
+            description: "EL video no fue encontrado.",
+            schema: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  example: "Video no encontrado.",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/video/{videoId}/new-like": {
       post: {
         tags: ["video"],
@@ -216,18 +262,6 @@ module.exports = {
         responses: {
           200: {
             description: "El like ya existe y no se realiza ninguna acción adicional.",
-            schema: {
-              type: "object",
-              properties: {
-                message: {
-                  type: "string",
-                  example: "OK",
-                },
-              },
-            },
-          },
-          201: {
-            description: "El like no existía y se crea un nuevo documento.",
             schema: {
               type: "object",
               properties: {
@@ -443,6 +477,56 @@ module.exports = {
         },
       },
       required: ["title", "description", "video", "image"],
+    },
+    showVideoResponse: {
+      type: "object",
+      properties: {
+        id: {
+          type: "string",
+          example: "629b82eb8fe398f547c03c24",
+        },
+        title: {
+          type: "string",
+          example: "Manual para dormir",
+        },
+        description: {
+          type: "string",
+          example: "La forma correcta de dormir cada noche, no se olviden mirar antes el video de como despertarse.",
+        },
+        videoUrl: {
+          type: "string",
+          example: "https://www.youtube.com/watch?v=SdsaZ-t1QwA",
+        },
+        imageUrl: {
+          type: "string",
+          example: "https://www.youtube.com/watch?v=SdsaZ-t1QwA",
+        },
+        visits: {
+          type: "number",
+          example: 1230,
+        },
+        comments: {
+          type: "array",
+          items: [],
+          example: [],
+        },
+        likes: {
+          type: "number",
+          example: 123,
+        },
+        userLikeVideo: {
+          type: "boolean",
+          example: false,
+        },
+        createdAt: {
+          type: "string",
+          format: "date-time",
+        },
+        updateAt: {
+          type: "string",
+          format: "date-time",
+        },
+      },
     },
   },
 };
