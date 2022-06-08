@@ -502,7 +502,7 @@ module.exports = {
         produces: ['application/json'],
       }, // .end get
     }, // .end /users
-    '/users/channel': {
+    '/user/channel': {
       get: {
         tags: ['user'],
         summary: '',
