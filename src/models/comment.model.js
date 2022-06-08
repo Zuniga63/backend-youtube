@@ -1,15 +1,15 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model } = require('mongoose');
 
 const commentSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     videoId: {
       type: Schema.Types.ObjectId,
-      ref: "Video",
+      ref: 'Video',
       required: true,
     },
     commentBody: String,
@@ -19,6 +19,6 @@ const commentSchema = new Schema(
   }
 );
 
-const Comment = model("Comment", commentSchema);
+const Comment = model('Comment', commentSchema);
 
 module.exports = Comment;
