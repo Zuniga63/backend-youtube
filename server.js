@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/videos', videoRouter);
-app.use('/users', userRouter);
+app.use('/user', userRouter);
 app.use('/videos/comments/', comentRouter);
 app.use('/label', labelRouter);
 app.use('/video', videoLikeRouter);

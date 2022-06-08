@@ -1,14 +1,16 @@
-const User = require("../models/user.model");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user.model');
 
 module.exports = {
   async list(req, res) {
     try {
       const users = await User.find();
-      res.status(200).json({ message: "Users found", data: users });
+      res.status(200).json({ message: 'Users found', data: users });
     } catch (err) {
-      res.status(404).json({ message: "Users not found" });
+      res.status(404).json({ message: 'Users not found' });
     }
   },
 
@@ -16,19 +18,26 @@ module.exports = {
     try {
       const userId = req.user;
       const user = await User.findById(userId);
-      res.status(200).json({ message: "User found", user });
+      res.status(200).json({
+        message: 'User found',
+        user: {
+          name: user.firstName,
+          avatar: user.avatarUrl,
+          email: user.email,
+        },
+      });
     } catch (err) {
-      res.status(404).json({ message: "User not found", data: err });
+      res.status(404).json({ message: 'User not found', data: err });
     }
   },
 
   async signup(req, res) {
     try {
-      const { password, confirmPassword, firstName, lastName } = req.body;
-      let { avatar } = req.body;
+      const { password, confirmPassword } = req.body;
+      const { avatar } = req.body;
 
       if (password !== confirmPassword) {
-        return res.status(403).json({ message: "Contraseñas no coinciden" });
+        return res.status(403).json({ message: 'Contraseñas no coinciden' });
       }
       const encPassword = await bcrypt.hash(password, 8);
 
@@ -43,16 +52,16 @@ module.exports = {
       });
 
       res.status(201).json({
-        message: "User created",
-        token: token,
+        message: 'User created',
+        token,
         user: {
-          name: user.name,
-          avatar: user.avatar,
+          name: user.firstName,
+          avatar: user.avatarUrl,
           email: user.email,
         },
       });
     } catch (err) {
-      res.status(400).json({ message: "User could not be created", data: err });
+      res.status(400).json({ message: 'User could not be created', data: err });
     }
   },
 
@@ -63,13 +72,13 @@ module.exports = {
       const user = await User.findOne({ email });
 
       if (!user) {
-        throw new Error("Usuario o contraseña invalida");
+        throw new Error('Usuario o contraseña invalida');
       }
 
       const isValid = await bcrypt.compare(password, user.password);
 
       if (!isValid) {
-        throw new Error("Usuario o contraseña invalida");
+        throw new Error('Usuario o contraseña invalida');
       }
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
@@ -77,16 +86,16 @@ module.exports = {
       });
 
       res.status(201).json({
-        message: "User login",
-        token: token,
+        message: 'User login',
+        token,
         user: {
-          name: user.name,
-          avatar: user.avatar,
+          name: user.firstName,
+          avatar: user.avatarUrl,
           email: user.email,
         },
       });
     } catch (err) {
-      res.status(400).json({ message: "User could not login", data: err });
+      res.status(400).json({ message: 'User could not login', data: err });
     }
   },
 
@@ -96,9 +105,9 @@ module.exports = {
       const user = await User.findByIdAndUpdate(userId, req.body, {
         new: true,
       });
-      res.status(200).json({ message: "User updated", data: user });
+      res.status(200).json({ message: 'User updated', data: user });
     } catch (err) {
-      res.status(400).json({ message: "User could not be updated", data: err });
+      res.status(400).json({ message: 'User could not be updated', data: err });
     }
   },
 
@@ -107,9 +116,9 @@ module.exports = {
       const userId = req.user;
 
       const userDeleted = await User.findByIdAndDelete(userId);
-      res.status(200).json({ message: "User deleted", data: userDeleted });
+      res.status(200).json({ message: 'User deleted', data: userDeleted });
     } catch (err) {
-      res.status(400).json({ message: "User could not be deleted", data: err });
+      res.status(400).json({ message: 'User could not be deleted', data: err });
     }
   },
 };
