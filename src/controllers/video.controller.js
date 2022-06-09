@@ -150,7 +150,7 @@ module.exports = {
         return;
       }
       console.log(err);
-      res.status(502).json(err.message);
+      res.status(502).end();
     }
   },
 
