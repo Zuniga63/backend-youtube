@@ -27,7 +27,7 @@ app.use(cors());
 app.use('/videos', videoRouter);
 app.use('/user', userRouter);
 app.use('/videos/comments/', comentRouter);
-app.use('/label', labelRouter);
+app.use('/labels', labelRouter);
 app.use('/video', videoLikeRouter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

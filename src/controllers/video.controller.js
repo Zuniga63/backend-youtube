@@ -1,17 +1,52 @@
-const Video = require("../models/video.model");
-const User = require("../models/user.model");
-const { request, response } = require("express");
-const { createSlug } = require("../utils/labelUtils");
-const Label = require("../models/label.model");
-const VideoLike = require("../models/videoLike.model");
+const Video = require('../models/video.model');
+const User = require('../models/user.model');
+const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
+const Label = require('../models/label.model');
+const VideoLike = require('../models/videoLike.model');
+
+/**
+ * @param {Array} labelNames -  Arreglo con los nombres de las etiquetas a crear o buscar.
+ * @returns
+ */
+const findOrCreateLabels = async (labelNames = []) => {
+  const labels = [];
+  const errors = [];
+
+  if (labelNames && labelNames.length > 0) {
+    await Promise.all(
+      labelNames.map(async (name) => {
+        const slug = createSlug(name);
+
+        const label = await Label.findOne({ slug });
+
+        if (label) {
+          labels.push(label);
+        } else {
+          const newLabel = await Label.create({
+            name: normalizeLabelName(name),
+            slug: createSlug(name),
+          });
+          if (newLabel) {
+            labels.push(newLabel);
+          } else {
+            errors.push(name);
+          }
+        }
+      })
+    );
+  }
+  return { labels, errors };
+};
 
 module.exports = {
   async list(req, res) {
     try {
-      const videos = await Video.find().populate("userId", "name email avatar").populate("labels", "name slug");
-      res.status(200).json({ message: "Videos found", data: videos });
+      const videos = await Video.find()
+        .populate('userId', 'name email avatar')
+        .populate('labels', 'name slug');
+      res.status(200).json({ message: 'Videos found', data: videos });
     } catch (err) {
-      res.status(404).json({ message: "Videos nor found" });
+      res.status(404).json({ message: 'Videos nor found' });
     }
   },
 
@@ -26,18 +61,17 @@ module.exports = {
       const userId = req.user;
       let userLikeVideo = false;
 
-      //Se recupera el video
+      // Se recupera el video
       const video = await Video.findById(videoId)
-        .populate("userId", "name email avatar")
+        .populate('userId', 'name email avatar')
         .populate({
-          path: "comments",
-          select: "commentBody",
-          populate: { path: "userId", select: "name avatar" },
-        })
-        .select("-labels");
+          path: 'comments',
+          select: 'commentBody',
+          populate: { path: 'userId', select: 'name avatar' },
+        });
 
       if (!video) {
-        res.status(404).json({ message: "video not found." });
+        res.status(404).json({ message: 'video not found.' });
         return;
       }
 
@@ -55,11 +89,17 @@ module.exports = {
       /**
        * * Unica forma que encontre para gregar esas dos proiedades.
        */
-      const videoData = { ...video.toObject(), likes: video.likes.length, userLikeVideo };
+      const videoData = {
+        ...video.toObject(),
+        likes: video.likes.length,
+        userLikeVideo,
+      };
 
-      res.status(200).json({ message: "Video found", video: videoData });
+      res.status(200).json({ message: 'Video found', video: videoData });
     } catch (err) {
-      res.status(500).json({ message: "Internal server Error.", data: err.message });
+      res
+        .status(500)
+        .json({ message: 'Internal server Error.', data: err.message });
     }
   },
 
@@ -70,51 +110,47 @@ module.exports = {
   async create(req, res) {
     try {
       const { labels: labelNames } = req.body;
-      const labels = [];
-      const info = {
-        video: null,
-        labelsCreated: 0,
-      };
 
       const userId = req.user;
       const user = await User.findById(userId);
       if (!user) {
-        res.status(404).json({ message: "Usuario no encontrado." });
+        res.status(404).json({ message: 'Usuario no encontrado.' });
         return;
       }
 
-      //Se crean o se recuperan las instancias de labels
-      if (labelNames && labelNames.length > 0) {
-        for (let index = 0; index < labelNames.length; index++) {
-          const name = labelNames[index];
-          const slug = createSlug(name);
-          let label = await Label.findOne({ slug });
+      const { labels, errors: labelErrors } = await findOrCreateLabels(
+        labelNames
+      );
 
-          //Si no encunetra ninguna etiqueta, enconces se procede a crearla.
-          if (!label) {
-            label = await Label.create({ name, slug });
-            if (!label) {
-              res.status(502).json({ message: "No se pudieron crear las etiquetas." });
-              return;
-            }
-            info.labelsCreated += 1;
-          } //.end if
+      const video = await Video.create({
+        ...req.body,
+        userId,
+        labels,
+      });
 
-          labels.push(label);
-        }
-      }
-
-      const video = await Video.create({ ...req.body, userId, labels });
-      info.video = video;
-      //Se agrega a cada etiqueta el video
-      for (let index = 0; index < labels.length; index++) {
+      // Se agrega a cada etiqueta el video
+      const labelUpdates = [];
+      const updateOptions = { validateBeforeSave: false };
+      for (let index = 0; index < labels.length; index += 1) {
         const label = labels[index];
         label.videos.push(video._id);
-        await label.save({ validateBeforeSave: false });
+        labelUpdates.push(label.save(updateOptions));
       }
-      res.status(201).json(info);
+
+      await Promise.all(labelUpdates);
+
+      res.status(201).json({
+        message: 'Video creado exitosamente',
+        video,
+        labelErrors,
+      });
     } catch (err) {
-      res.status(502).json(err);
+      if (err.name === 'ValidationError') {
+        res.status(406).json(err);
+        return;
+      }
+      console.log(err);
+      res.status(502).json(err.message);
     }
   },
 
@@ -126,7 +162,7 @@ module.exports = {
       const video = await Video.findById(videoId);
 
       if (video.userId.toString() !== userId) {
-        res.status(403).json({ message: "unauthorized user" });
+        res.status(403).json({ message: 'unauthorized user' });
         return;
       }
 
@@ -134,9 +170,11 @@ module.exports = {
         new: true,
       });
 
-      res.status(200).json({ message: "video updated", data: videoUpdated });
+      res.status(200).json({ message: 'video updated', data: videoUpdated });
     } catch (err) {
-      res.status(400).json({ message: "Video could not be updated", data: err });
+      res
+        .status(400)
+        .json({ message: 'Video could not be updated', data: err });
     }
   },
 
@@ -150,35 +188,53 @@ module.exports = {
       const userId = req.user;
 
       const video = await Video.findById(videoId);
-      let labelUpdates = 0;
       if (!video) {
-        res.status(404).json({ message: "Video no encontrado." });
+        res.status(404).json({ message: 'Video no encontrado.' });
         return;
       }
 
       if (video.userId.toString() !== userId) {
-        res.status(403).json({ message: "unauthorized user" });
+        res.status(403).json({ message: 'unauthorized user' });
         return;
       }
 
-      const videoDeleted = await Video.deleteOne({ _id: videoId });
+      await Video.deleteOne({ _id: videoId });
 
-      //Se elimina el video de las etiquetas
-      const labels = video.labels;
+      /**
+       * * Esta es una forma de hacer peticiones asincronas en bucles
+       * ! Ojo que el async esta dentro del map.
+       */
+      const labels = [];
+      await Promise.all(
+        video.labels.map(async (labelId) => {
+          const label = await Label.findById(labelId);
+          labels.push(label);
+        })
+      );
 
-      //Se busca cada etiqueta y se borra el video
-      for (let index = 0; index < labels.length; index++) {
-        const labelId = labels[index];
-        const label = await Label.findById(labelId);
+      // Se actualizan las etiquetas
+      const labelUpdates = [];
+      for (let index = 0; index < labels.length; index += 1) {
+        const label = labels[index];
+        label.videos = label.videos.filter(
+          (item) => item._id.toString() !== videoId
+        );
 
-        label.videos = label.videos.filter((video) => video._id.toString() !== videoId);
-        await label.save({ validateBeforeSave: false });
-        labelUpdates += 1;
+        /**
+         * El metodo label.save() es asincrono y retorna una promesa.
+         */
+        labelUpdates.push(label.save({ validateBeforeSave: false }));
       }
+      await Promise.all(labelUpdates);
 
-      res.status(200).json({ message: "video Deleted", video, labelUpdates });
+      res.status(200).json({
+        message: 'video Deleted',
+        video,
+        labelUpdates: labelUpdates.length,
+      });
     } catch (error) {
-      res.status(502).json(error);
+      console.log(error);
+      res.status(502).json(error.message);
     }
   },
 };

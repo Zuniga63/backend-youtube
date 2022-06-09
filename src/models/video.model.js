@@ -9,7 +9,12 @@ const videoSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    title: String,
+    title: {
+      type: String,
+      minlength: 3,
+      maxlength: 90,
+      required: true,
+    },
     description: String,
     videoUrl: String,
     imageUrl: String,
@@ -28,7 +33,7 @@ const videoSchema = new Schema(
 );
 
 // middleware to delete comments from the collections comments of the deleted video
-videoSchema.pre('deleteOne', async function (next) {
+videoSchema.pre('deleteOne', async function cascadeOnDelete(next) {
   try {
     const { _id: videoId } = this.getFilter();
     await Comment.deleteMany({ videoId });
