@@ -10,7 +10,7 @@ const swaggerDocument = require('./swagger');
 
 const videoRouter = require('./src/routes/video');
 const userRouter = require('./src/routes/user');
-const comentRouter = require('./src/routes/comment');
+const commentRouter = require('./src/routes/comment');
 const labelRouter = require('./src/routes/label');
 const videoLikeRouter = require('./src/routes/videoLike');
 
@@ -25,8 +25,8 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/videos', videoRouter);
-app.use('/user', userRouter);
-app.use('/videos/comments/', comentRouter);
+app.use('/users', userRouter);
+app.use('/', commentRouter);
 app.use('/label', labelRouter);
 app.use('/video', videoLikeRouter);
 
