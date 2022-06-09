@@ -11,8 +11,11 @@ module.exports = {
   async create(req, res) {
     try {
       const { videoId } = req.params;
-      const user = User.findById(req.user);
+      const userId = req.user;
+
+      const user = await User.findById(req.user);
       const { commentBody } = req.body;
+
       if (!user) {
         res.status(404).json({ message: "Don't find the user" });
         return;
@@ -26,29 +29,25 @@ module.exports = {
       }
 
       const comment = await Comment.create({
-        userId: user,
-        videoId: video,
+        userId,
+        videoId,
         commentBody,
       });
-      console.log(comment);
-      res.status(200).end();
 
       video.comments.push(comment._id);
       await video.save({ validateBeforeSave: false });
-      // user.comments.push(comment._id);
-      // await user.save({ validateBeforeSave: false });
 
-      // res.status(201).json({ message: "the comment it's created", comment });
+      res.status(201).json({ message: "the comment it's created", comment });
     } catch (err) {
-      // res.status(400).json(err);
+      res.status(400).json(err);
       console.log(err);
     }
   },
 
   async destroy(req, res) {
     try {
-      const { commentId } = req.params;
-      const { videoId, userId } = req.body;
+      const { commentId, videoId } = req.params;
+      const userId = req.user;
 
       const userIdComment = await Comment.findById(commentId);
 
@@ -63,7 +62,7 @@ module.exports = {
       video.comments = video.comments.filter(
         (item) => item._id.toString() !== commentId
       );
-      video.save({ validateBeforeSave: false });
+      await video.save({ validateBeforeSave: false });
 
       res.status(200).json({ message: 'comment deleted', data: comment });
     } catch (err) {

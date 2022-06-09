@@ -29,7 +29,7 @@ module.exports = {
     },
     {
       name: 'comments',
-      description: '',
+      description: 'Endpoint para administrar los comentarios',
     },
   ],
   paths: {
@@ -596,18 +596,126 @@ module.exports = {
         produces: ['application/json'],
       }, // .end delete
     },
-    '/comments': {
+    '/videos/{videoId}/comments': {
       post: {
         tags: ['comments'],
-        summary: '',
+        summary: 'Agrega un nuevo comentario al video',
         produces: ['application/json'],
+        parameters: [
+          {
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: true,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+          {
+            name: 'videoId',
+            in: 'path',
+            description: 'ID del video a agregar el comment.',
+            required: true,
+          },
+          {
+            name: 'body',
+            in: 'body',
+            description: 'los datos del comentario relacionado al video',
+            required: true,
+            schema: {
+              type: 'object',
+              properties: {
+                commentBody: {
+                  type: 'string',
+                  required: true,
+                  example:
+                    'este video me parecio muy gracioso y lo recomendare',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          404: {
+            description: 'el usuario o el video no fueron encontrados',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'usuario no encontrado',
+                },
+              },
+            },
+          },
+          201: {
+            description:
+              'el comentario fue creado y agregado correctamente al usuario y al video',
+            schema: {
+              $ref: '#/definitions/comment',
+            },
+          },
+        },
       },
     },
-    '/comments/{commentId}': {
+    '/videos/{videoId}/comments/{commentId}': {
       delete: {
         tags: ['comments'],
-        summary: '',
+        summary: 'Elimina un comentario existente en el video',
         produces: ['application/json'],
+        parameters: [
+          {
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: true,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+          {
+            name: 'videoId',
+            in: 'path',
+            description: 'ID del video al cual le eliminaremos el comment.',
+            required: true,
+          },
+          {
+            name: 'body',
+            in: 'body',
+            description: 'los datos del comentario relacionado al video',
+            required: true,
+            schema: {
+              type: 'object',
+              properties: {
+                commentBody: {
+                  type: 'string',
+                  required: true,
+                  example:
+                    'este video me parecio muy gracioso y lo recomendare',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'el comentario fue eliminado correctamente al usuario y al video',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'OK',
+                },
+              },
+            },
+          },
+        },
       },
     },
   }, // .end path
@@ -813,6 +921,24 @@ module.exports = {
           format: 'date-time',
         },
       },
+    },
+    comment: {
+      type: 'object',
+      properties: {
+        userId: {
+          type: 'string',
+          example: 'Id.del.usuario',
+        },
+        videoId: {
+          type: 'string',
+          example: 'Id.del.video',
+        },
+        commentBody: {
+          type: 'string',
+          example: 'este video me parecio muy gracioso y lo recomendare',
+        },
+      },
+      required: ['videoId', 'userId', 'commentBody'],
     },
   },
 };
