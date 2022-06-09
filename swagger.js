@@ -684,21 +684,10 @@ module.exports = {
             required: true,
           },
           {
-            name: 'body',
-            in: 'body',
-            description: 'los datos del comentario relacionado al video',
+            name: 'commentId',
+            in: 'path',
+            description: 'ID del comment el cual eliminaremos.',
             required: true,
-            schema: {
-              type: 'object',
-              properties: {
-                commentBody: {
-                  type: 'string',
-                  required: true,
-                  example:
-                    'este video me parecio muy gracioso y lo recomendare',
-                },
-              },
-            },
           },
         ],
         responses: {
