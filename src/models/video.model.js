@@ -16,8 +16,14 @@ const videoSchema = new Schema(
       required: true,
     },
     description: String,
-    videoUrl: String,
-    imageUrl: String,
+    videoUrl: {
+      type: String,
+      required: true,
+    },
+    imageUrl: {
+      type: String,
+      required: true,
+    },
     visits: Number,
     labels: [{ type: Schema.Types.ObjectId, ref: 'Label' }],
     comments: {
