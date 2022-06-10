@@ -15,7 +15,7 @@ const findOrCreateLabels = async (labelNames = []) => {
   if (labelNames && labelNames.length > 0) {
     await Promise.all(
       labelNames.map(async (name) => {
-        const slug = createSlug(name);
+        const slug = createSlug(name.trim());
 
         const label = await Label.findOne({ slug });
 

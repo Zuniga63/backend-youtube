@@ -8,6 +8,7 @@ module.exports = {
   createSlug(text) {
     return text
       ? text
+          .trim()
           .toLocaleLowerCase()
           .replace(/\s/gi, '-')
           .normalize('NFD')
@@ -20,23 +21,26 @@ module.exports = {
   normalizeLabelName(name) {
     if (typeof name === 'string' && name.length > 0) {
       let firsrWord = true;
-      const words = name.split(' ').map((item) => {
-        let firstChar = item[0];
+      const words = name
+        .trim()
+        .split(' ')
+        .map((item) => {
+          let firstChar = item[0];
 
-        /**
-         * * Si es una palabra de un solo caracter
-         * * este codigo retorna un ('');
-         */
-        const rest = item.substring(1).toLocaleLowerCase();
+          /**
+           * * Si es una palabra de un solo caracter
+           * * este codigo retorna un ('');
+           */
+          const rest = item.substring(1).toLocaleLowerCase();
 
-        // * Solo si es la primera palabra entonces se capitaliza.
-        if (firsrWord) {
-          firstChar = firstChar.toUpperCase();
-          firsrWord = false;
-        }
+          // * Solo si es la primera palabra entonces se capitaliza.
+          if (firsrWord) {
+            firstChar = firstChar.toUpperCase();
+            firsrWord = false;
+          }
 
-        return [firstChar, rest].join('');
-      });
+          return [firstChar, rest].join('');
+        });
 
       return words.join(' ');
     }
