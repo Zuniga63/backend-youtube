@@ -25,9 +25,9 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/videos', videoRouter);
+app.use('/labels', labelRouter);
 app.use('/users', userRouter);
 app.use('/', commentRouter);
-app.use('/label', labelRouter);
 app.use('/video', videoLikeRouter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

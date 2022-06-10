@@ -1,6 +1,6 @@
-const Label = require("../models/label.model");
-const Video = require("../models/video.model");
-const { createSlug } = require("../utils/labelUtils");
+const Label = require('../models/label.model');
+const Video = require('../models/video.model');
+const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
 
 module.exports = {
   async list(_, res) {
@@ -15,17 +15,19 @@ module.exports = {
     const { name } = req.body;
 
     if (name === undefined) {
-      res.status(400).json({ message: "Nombre de etiqueta faltante." });
+      res.status(400).json({ message: 'Nombre de etiqueta faltante.' });
       return;
     }
 
     const slug = createSlug(name);
 
     try {
-      const label = await Label.create({ name, slug });
-      res.status(201).json({ message: "Label was create", label });
+      const label = await Label.create({
+        name: normalizeLabelName(name),
+        slug,
+      });
+      res.status(201).json({ message: 'Label was create', label });
     } catch (error) {
-
       res.status(502).json(error);
     }
   },
@@ -34,13 +36,13 @@ module.exports = {
       const { slug } = req.params;
 
       if (!slug) {
-        res.status(400).json({ message: "Slug is required." });
+        res.status(400).json({ message: 'Slug is required.' });
         return;
       }
 
       const label = await Label.findOne({ slug });
       if (!label) {
-        res.status(404).json({ message: "Etiqueta no encontrada" });
+        res.status(404).json({ message: 'Etiqueta no encontrada' });
         return;
       }
 
@@ -55,23 +57,27 @@ module.exports = {
 
     try {
       if (name === undefined || !slug) {
-        res.status(400).json({ message: "Slug or label name missing" });
+        res.status(400).json({ message: 'Slug or label name missing' });
         return;
       }
 
       const newSlug = createSlug(name);
 
-      //Se realiza la actualización
-      const update = { name };
+      // Se realiza la actualización
+      const update = { name: normalizeLabelName(name) };
       if (newSlug !== slug) update.slug = newSlug;
-      const label = await Label.findOneAndUpdate({ slug }, update, { new: true, runValidators: true });
+
+      const label = await Label.findOneAndUpdate({ slug }, update, {
+        new: true,
+        runValidators: true,
+      });
 
       if (!label) {
-        res.status(404).json({ message: "Etiqueta no encontrada." });
+        res.status(404).json({ message: 'Etiqueta no encontrada.' });
         return;
       }
 
-      res.status(200).json({ label, message: "Etiqueta actualizada." });
+      res.status(200).json({ label, message: 'Etiqueta actualizada.' });
     } catch (error) {
       res.status(502).json(error);
     }
@@ -80,30 +86,35 @@ module.exports = {
     try {
       const { slug } = req.params;
       if (!slug) {
-        res.status(400).json({ message: "Slug is missing" });
+        res.status(400).json({ message: 'Slug is missing' });
         return;
       }
 
-      const label = await Label.findOneAndDelete({ slug });
-      if (!label) {
-        res.status(404).json({ message: "Etiqueta no encontrada." });
+      const labelDeleted = await Label.findOneAndDelete({ slug });
+
+      if (!labelDeleted) {
+        res.status(404).json({ message: 'Etiqueta no encontrada.' });
         return;
       }
 
+      // Se elimina la etiqueta de los video
+      await Promise.all(
+        labelDeleted.videos.map(async (videoId) => {
+          const video = await Video.findById(videoId);
+          if (video) {
+            video.labels = video.labels.filter(
+              (label) => label._id.toString() !== labelDeleted._id.toString()
+            );
 
-      //Ahora se elimina la realción de los videos
-      for (let index = 0; index < label.videos.length; index++) {
-        const video = await Video.findById(label.videos[index]);
-        const labelId = label._id.toString();
-        if (video) {
-          video.labels = video.labels.filter((label) => label._id.toString() !== labelId);
-          await video.save({ validateBeforeSave: false });
-        }
-      }
+            await video.save({ validateBeforeSave: false });
+          }
+        }) // .end map
+      );
 
-      res.status(200).json({ label, message: "label deleted." });
+      res.status(200).json({ label: labelDeleted, message: 'label deleted.' });
     } catch (error) {
-      res.status(502).json(error);
+      console.log(error);
+      res.status(502).json(error.message);
     }
   },
 };
