@@ -15,7 +15,7 @@ const findOrCreateLabels = async (labelNames = []) => {
   if (labelNames && labelNames.length > 0) {
     await Promise.all(
       labelNames.map(async (name) => {
-        const slug = createSlug(name);
+        const slug = createSlug(name.trim());
 
         const label = await Label.findOne({ slug });
 
@@ -109,7 +109,13 @@ module.exports = {
    */
   async create(req, res) {
     try {
-      const { labels: labelNames } = req.body;
+      const {
+        title,
+        description,
+        image: imageInfo,
+        video: videoInfo,
+        labels: labelNames,
+      } = req.body;
 
       const userId = req.user;
       const user = await User.findById(userId);
@@ -119,11 +125,16 @@ module.exports = {
       }
 
       const { labels, errors: labelErrors } = await findOrCreateLabels(
-        labelNames
+        JSON.parse(labelNames)
       );
 
+      console.log(req.body);
+
       const video = await Video.create({
-        ...req.body,
+        title,
+        description,
+        imageUrl: imageInfo.url,
+        videoUrl: videoInfo.url,
         userId,
         labels,
       });
