@@ -26,7 +26,7 @@ app.use(cors());
 
 app.use('/videos', videoRouter);
 app.use('/labels', labelRouter);
-app.use('/users', userRouter);
+app.use('/user', userRouter);
 app.use('/', commentRouter);
 app.use('/video', videoLikeRouter);
 
