@@ -42,9 +42,9 @@ module.exports = {
   async list(req, res) {
     try {
       const videos = await Video.find()
-        .populate('userId', 'name email avatar')
+        .populate('userId', 'firstName lastName email avatar')
         .populate('labels', 'name slug');
-      res.status(200).json({ message: 'Videos found', data: videos });
+      res.status(200).json({ message: 'Videos found', videos });
     } catch (err) {
       res.status(404).json({ message: 'Videos nor found' });
     }
@@ -63,7 +63,7 @@ module.exports = {
 
       // Se recupera el video
       const video = await Video.findById(videoId)
-        .populate('userId', 'name email avatar')
+        .populate('userId', 'firstName email avatar')
         .populate({
           path: 'comments',
           select: 'commentBody',
@@ -127,8 +127,6 @@ module.exports = {
       const { labels, errors: labelErrors } = await findOrCreateLabels(
         JSON.parse(labelNames)
       );
-
-      console.log(req.body);
 
       const video = await Video.create({
         title,
