@@ -46,17 +46,17 @@ const userSchema = new Schema(
 
 userSchema
   .virtual('fullName')
-  .get(function () {
+  .get(function get() {
     const { firstName, lastName } = this;
     return `${firstName} ${lastName}`;
   })
-  .set(function (fullName) {
+  .set(function set(fullName) {
     const [firstName, lastName] = fullName.split(' ');
     this.firstName = firstName;
     this.lastName = lastName;
   });
 
-userSchema.virtual('avatarUrl').get(function () {
+userSchema.virtual('avatarUrl').get(function get() {
   const { firstName, lastName } = this;
   if (!this.avatar) {
     const uri = 'https://ui-avatars.com/api/?background=random';
