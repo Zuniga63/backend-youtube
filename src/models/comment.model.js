@@ -14,7 +14,7 @@ const commentSchema = new Schema(
     },
     body: {
       type: String,
-      minlength: 1,
+      minlength: 3,
       required: true,
     },
   },
