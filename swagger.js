@@ -597,6 +597,50 @@ module.exports = {
       }, // .end delete
     },
     '/videos/{videoId}/comments': {
+      get: {
+        tags: ['comments'],
+        summary: 'Recupera todos los comentarios del video.',
+        produces: ['application/json'],
+        parameters: [
+          {
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: false,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+          {
+            name: 'videoId',
+            in: 'path',
+            description: 'ID del video.',
+            required: true,
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Arreglo con los comentarios del video.',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Ok',
+                },
+                comments: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/definitions/videoComment',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       post: {
         tags: ['comments'],
         summary: 'Agrega un nuevo comentario al video',
@@ -709,6 +753,38 @@ module.exports = {
     },
   }, // .end path
   definitions: {
+    userLite: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        id: {
+          type: 'string',
+          example: '629b65d5b6d0afbe4ae5c8ce',
+        },
+        firstName: {
+          type: 'string',
+          example: 'Jonh',
+        },
+        lastName: {
+          type: 'string',
+          example: 'Doe',
+        },
+        fullName: {
+          type: 'string',
+          example: 'John Doe',
+        },
+        avatar: {
+          type: 'string',
+          example:
+            'https://ui-avatars.com/api/?background=random&name=John+Doe',
+        },
+        avatarUrl: {
+          type: 'string',
+          example:
+            'https://ui-avatars.com/api/?background=random&name=John+Doe',
+        },
+      },
+    },
     labelPost: {
       type: 'object',
       required: ['name'],
@@ -928,6 +1004,38 @@ module.exports = {
         },
       },
       required: ['videoId', 'userId', 'commentBody'],
+    },
+    videoComment: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          example: '62a534aaeb6b3615c506c5b5',
+        },
+        userId: {
+          type: 'string',
+          example: 'Id.del.usuario',
+        },
+        videoId: {
+          type: 'string',
+          example: 'Id.del.video',
+        },
+        commentBody: {
+          type: 'string',
+          example: 'este video me parecio muy gracioso y lo recomendare',
+        },
+        user: {
+          $ref: '#definitions/userLite',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+        updateAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+      },
     },
   },
 };

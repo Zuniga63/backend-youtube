@@ -44,6 +44,24 @@ module.exports = {
     }
   },
 
+  /**
+   * Recupera los comentarios asociados del video.
+   * @param {object} req
+   * @param {object} res
+   */
+  async videoComments(req, res) {
+    const { videoId } = req.params;
+
+    const comments = await Comment.find({ videoId })
+      .sort('createdAt')
+      .populate({ path: 'user', select: 'id firstName lastName avatar' });
+
+    res.status(200).json({
+      message: 'Ok',
+      comments,
+    });
+  },
+
   async destroy(req, res) {
     try {
       const { commentId, videoId } = req.params;
