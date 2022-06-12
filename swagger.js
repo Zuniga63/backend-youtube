@@ -698,7 +698,16 @@ module.exports = {
             description:
               'el comentario fue creado y agregado correctamente al usuario y al video',
             schema: {
-              $ref: '#/definitions/comment',
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Ok',
+                },
+                comment: {
+                  $ref: '#/definitions/comment',
+                },
+              },
             },
           },
         },
@@ -990,6 +999,10 @@ module.exports = {
     comment: {
       type: 'object',
       properties: {
+        id: {
+          type: 'string',
+          example: '62a534aaeb6b3615c506c5b5',
+        },
         userId: {
           type: 'string',
           example: 'Id.del.usuario',
@@ -998,12 +1011,19 @@ module.exports = {
           type: 'string',
           example: 'Id.del.video',
         },
-        commentBody: {
+        body: {
           type: 'string',
           example: 'este video me parecio muy gracioso y lo recomendare',
         },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+        updateAt: {
+          type: 'string',
+          format: 'date-time',
+        },
       },
-      required: ['videoId', 'userId', 'commentBody'],
     },
     videoComment: {
       type: 'object',

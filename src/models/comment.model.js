@@ -12,7 +12,11 @@ const commentSchema = new Schema(
       ref: 'Video',
       required: true,
     },
-    commentBody: String,
+    body: {
+      type: String,
+      minlength: 1,
+      required: true,
+    },
   },
   {
     timestamps: true,

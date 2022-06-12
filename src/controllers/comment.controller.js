@@ -31,13 +31,13 @@ module.exports = {
       const comment = await Comment.create({
         userId,
         videoId,
-        commentBody,
+        body: commentBody,
       });
 
       video.comments.push(comment._id);
       await video.save({ validateBeforeSave: false });
 
-      res.status(201).json({ message: "the comment it's created", comment });
+      res.status(201).json({ message: 'Ok', comment });
     } catch (err) {
       res.status(400).json(err);
       console.log(err);
