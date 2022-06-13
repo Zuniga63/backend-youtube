@@ -2,6 +2,11 @@
 const Comment = require('../models/comment.model');
 const User = require('../models/user.model');
 const Video = require('../models/video.model');
+const sendError = require('../utils/sendError');
+
+const userNotFound = { message: 'Usuario no encontrado.' };
+const commentNotFound = { message: 'Comentario no encontrado.' };
+const videoNotFound = { message: 'Video no encontrado.' };
 
 module.exports = {
   /**
@@ -31,19 +36,60 @@ module.exports = {
       const comment = await Comment.create({
         userId,
         videoId,
-        commentBody,
+        body: commentBody,
       });
 
       video.comments.push(comment._id);
       await video.save({ validateBeforeSave: false });
 
-      res.status(201).json({ message: "the comment it's created", comment });
+      res.status(201).json({ message: 'Ok', comment });
     } catch (err) {
-      res.status(400).json(err);
-      console.log(err);
+      sendError(err, res);
     }
   },
 
+  /**
+   * Recupera los comentarios asociados del video.
+   * @param {object} req
+   * @param {object} res
+   */
+  async videoComments(req, res) {
+    const { videoId } = req.params;
+
+    const comments = await Comment.find({ videoId })
+      .sort('createdAt')
+      .populate({ path: 'user', select: 'id firstName lastName avatar' });
+
+    res.status(200).json({
+      message: 'Ok',
+      comments,
+    });
+  },
+  async userComments(req, res) {
+    const userId = req.user;
+
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({
+          message: 'Usuario no encontrado.',
+        });
+      }
+
+      const comments = await Comment.find({ userId }).populate({
+        path: 'video',
+        select: 'id, title imageUrl',
+      });
+
+      res.status(200).json({
+        message: 'Ok',
+        comments,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).end();
+    }
+  },
   async destroy(req, res) {
     try {
       const { commentId, videoId } = req.params;
@@ -69,6 +115,42 @@ module.exports = {
       res
         .status(400)
         .json({ message: 'Comment could not be deleted', data: err });
+    }
+  },
+  async update(req, res) {
+    const { videoId, commentId } = req.params;
+    const { commentBody } = req.body;
+
+    try {
+      const user = await User.findById(req.user);
+      if (!user) {
+        res.status(404).json(userNotFound);
+        return;
+      }
+
+      const video = await Video.findById(videoId);
+      if (!video) {
+        res.status(404).json(videoNotFound);
+        return;
+      }
+
+      // Se recupera el comentario
+      const comment = await Comment.findById(commentId).where({
+        userId: user.id,
+        videoId: video.id,
+      });
+
+      if (!comment) {
+        res.status(404).json(commentNotFound);
+        return;
+      }
+
+      comment.body = commentBody;
+      await comment.save({ validateBeforeSave: true });
+
+      res.status(200).json({ message: 'Comentario Actualizado.', comment });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 };

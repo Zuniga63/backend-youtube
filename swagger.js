@@ -495,108 +495,51 @@ module.exports = {
         }, // .end responses
       }, // .end delete
     }, // .end route path
-    '/users': {
+    '/videos/{videoId}/comments': {
       get: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    }, // .end /users
-    '/user/channel': {
-      get: {
-        tags: ['user'],
-        summary: '',
+        tags: ['comments'],
+        summary: 'Recupera todos los comentarios del video.',
         produces: ['application/json'],
         parameters: [
           {
-            name: 'nickname',
-            in: 'query',
-            description: 'Nick del usuario',
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: false,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+          {
+            name: 'videoId',
+            in: 'path',
+            description: 'ID del video.',
             required: true,
-            type: 'string',
           },
         ],
-      }, // .end get
-    },
-    '/user/signup': {
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    }, // .end /users/signup
-    '/user/signin': {
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    }, // .end /users/signin
-    '/user/logout': {
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-        deprecated: true,
-      }, // .end get
-    }, // .end /users/logout
-    '/user': {
-      get: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    },
-    '/user/comments': {
-      get: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-        deprecated: true,
-      }, // .end get
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    },
-    '/user/comments/{commentId}': {
-      get: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-        deprecated: true,
-      }, // .end get
-      put: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-        deprecated: true,
-      }, // .end get
-      delete: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    },
-    '/user/profile': {
-      get: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-      put: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end post
-      delete: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end delete
-    },
-    '/videos/{videoId}/comments': {
+        responses: {
+          200: {
+            description: 'Arreglo con los comentarios del video.',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Ok',
+                },
+                comments: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/definitions/videoComment',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       post: {
         tags: ['comments'],
         summary: 'Agrega un nuevo comentario al video',
@@ -654,13 +597,90 @@ module.exports = {
             description:
               'el comentario fue creado y agregado correctamente al usuario y al video',
             schema: {
-              $ref: '#/definitions/comment',
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Ok',
+                },
+                comment: {
+                  $ref: '#/definitions/comment',
+                },
+              },
             },
           },
         },
       },
     },
     '/videos/{videoId}/comments/{commentId}': {
+      put: {
+        tags: ['comments'],
+        summary: 'Actualiza el cuerpo de un comentario.',
+        produces: ['application/json'],
+        parameters: [
+          // Token
+          {
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: true,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+          // Video ID
+          {
+            name: 'videoId',
+            in: 'path',
+            description: 'ID del video al cual le eliminaremos el comment.',
+            required: true,
+          },
+          // Comment Id
+          {
+            name: 'commentId',
+            in: 'path',
+            description: 'ID del comment el cual eliminaremos.',
+            required: true,
+          },
+          // body
+          {
+            name: 'body',
+            in: 'body',
+            description: 'los datos del comentario relacionado al video',
+            required: true,
+            schema: {
+              type: 'object',
+              properties: {
+                commentBody: {
+                  type: 'string',
+                  required: true,
+                  example:
+                    'este video me parecio muy gracioso y lo recomendare',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'El comentario fue actualizado correctamente.',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'OK',
+                },
+                comment: {
+                  $ref: '#definitions/comment',
+                },
+              },
+            },
+          },
+        },
+      },
       delete: {
         tags: ['comments'],
         summary: 'Elimina un comentario existente en el video',
@@ -707,8 +727,149 @@ module.exports = {
         },
       },
     },
+    '/users': {
+      get: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end get
+    }, // .end /users
+    '/user/channel': {
+      get: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+        parameters: [
+          {
+            name: 'nickname',
+            in: 'query',
+            description: 'Nick del usuario',
+            required: true,
+            type: 'string',
+          },
+        ],
+      }, // .end get
+    },
+    '/user/signup': {
+      post: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end get
+    }, // .end /users/signup
+    '/user/signin': {
+      post: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end get
+    }, // .end /users/signin
+    '/user/logout': {
+      post: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+        deprecated: true,
+      }, // .end get
+    }, // .end /users/logout
+    '/user': {
+      get: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end get
+    },
+    '/user/comments': {
+      get: {
+        tags: ['comments'],
+        summary: 'Recupera todos los comentarios realizados por el usuario.',
+        produces: ['application/json'],
+        parameters: [
+          {
+            name: 'autentication',
+            in: 'headers',
+            description: 'token de autenticación',
+            required: true,
+            schema: {
+              type: 'string',
+              example:
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOWI2NWQ1YjZkMGFmYmU0YWU1YzhjZSIsImlhdCI6MTY1NDM1MTMxNywiZXhwIjoxNjU0NDM3NzE3fQ.pG0El3BK-m3AZcKH77H9rT7pQ4F5HnQa7uvGhSWuFJY',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Arreglo con los comentarios del video.',
+            schema: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Ok',
+                },
+                comments: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/definitions/userComment',
+                  },
+                },
+              },
+            },
+          },
+        },
+      }, // .end get
+    },
+    '/user/profile': {
+      get: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end get
+      put: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end post
+      delete: {
+        tags: ['user'],
+        summary: '',
+        produces: ['application/json'],
+      }, // .end delete
+    },
   }, // .end path
   definitions: {
+    userInComment: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        id: {
+          type: 'string',
+          example: '629b65d5b6d0afbe4ae5c8ce',
+        },
+        firstName: {
+          type: 'string',
+          example: 'Jonh',
+        },
+        lastName: {
+          type: 'string',
+          example: 'Doe',
+        },
+        fullName: {
+          type: 'string',
+          example: 'John Doe',
+        },
+        avatar: {
+          type: 'string',
+          example:
+            'https://ui-avatars.com/api/?background=random&name=John+Doe',
+        },
+        avatarUrl: {
+          type: 'string',
+          example:
+            'https://ui-avatars.com/api/?background=random&name=John+Doe',
+        },
+      },
+    },
     labelPost: {
       type: 'object',
       required: ['name'],
@@ -829,6 +990,23 @@ module.exports = {
         },
       },
     },
+    videoInComment: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          example: '629b82eb8fe398f547c03c24',
+        },
+        title: {
+          type: 'string',
+          example: 'Manual para dormir',
+        },
+        imageUrl: {
+          type: 'string',
+          example: 'https://www.youtube.com/watch?v=SdsaZ-t1QwA',
+        },
+      },
+    },
     VideoCreateRequest: {
       type: 'object',
       properties: {
@@ -914,6 +1092,10 @@ module.exports = {
     comment: {
       type: 'object',
       properties: {
+        id: {
+          type: 'string',
+          example: '62a534aaeb6b3615c506c5b5',
+        },
         userId: {
           type: 'string',
           example: 'Id.del.usuario',
@@ -922,12 +1104,83 @@ module.exports = {
           type: 'string',
           example: 'Id.del.video',
         },
-        commentBody: {
+        body: {
           type: 'string',
           example: 'este video me parecio muy gracioso y lo recomendare',
         },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+        updateAt: {
+          type: 'string',
+          format: 'date-time',
+        },
       },
-      required: ['videoId', 'userId', 'commentBody'],
+    },
+    videoComment: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          example: '62a534aaeb6b3615c506c5b5',
+        },
+        userId: {
+          type: 'string',
+          example: 'Id.del.usuario',
+        },
+        videoId: {
+          type: 'string',
+          example: 'Id.del.video',
+        },
+        body: {
+          type: 'string',
+          example: 'este video me parecio muy gracioso y lo recomendare',
+        },
+        user: {
+          $ref: '#definitions/userInComment',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+        updateAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+      },
+    },
+    userComment: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          example: '62a534aaeb6b3615c506c5b5',
+        },
+        userId: {
+          type: 'string',
+          example: 'Id.del.usuario',
+        },
+        videoId: {
+          type: 'string',
+          example: 'Id.del.video',
+        },
+        body: {
+          type: 'string',
+          example: 'este video me parecio muy gracioso y lo recomendare',
+        },
+        video: {
+          $ref: '#definitions/videoInComment',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+        updateAt: {
+          type: 'string',
+          format: 'date-time',
+        },
+      },
     },
   },
 };
