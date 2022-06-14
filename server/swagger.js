@@ -893,7 +893,7 @@ module.exports = {
         },
         slug: {
           type: 'string',
-          example: 'Autos_Deportivos',
+          example: 'autos_deportivos',
         },
         videos: {
           type: 'array',
@@ -924,7 +924,7 @@ module.exports = {
         },
         slug: {
           type: 'string',
-          example: 'Autos_Deportivos',
+          example: 'autos_deportivos',
         },
         videos: {
           type: 'array',

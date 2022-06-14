@@ -10,7 +10,7 @@ module.exports = {
       ? text
           .trim()
           .toLocaleLowerCase()
-          .replace(/\s/gi, '-')
+          .replace(/\s/gi, '_')
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
       : '';
