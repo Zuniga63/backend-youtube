@@ -9,7 +9,9 @@ const { userAuth } = require('../middlewares/userAuth.middleware');
 router
   .route('/videos/:videoId/comments')
   .get(commentControllers.getVideoComments);
-router.route('/user/comments').get(userAuth, commentControllers.userComments);
+router
+  .route('/user/comments')
+  .get(userAuth, commentControllers.getUserComments);
 
 //-----------------------------------------------------------------------------------
 // METHODS POST

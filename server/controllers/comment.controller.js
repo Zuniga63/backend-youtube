@@ -69,7 +69,7 @@ module.exports = {
       sendError(error, res);
     }
   },
-  async userComments(req, res) {
+  async getUserComments(req, res) {
     const userId = req.user;
 
     try {
