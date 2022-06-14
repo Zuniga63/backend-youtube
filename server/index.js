@@ -4,15 +4,15 @@ require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 
 const mongoose = require('mongoose');
-const { connect } = require('./src/db');
+const { connect } = require('./db');
 
 const swaggerDocument = require('./swagger');
 
-const videoRouter = require('./src/routes/video');
-const userRouter = require('./src/routes/user');
-const commentRouter = require('./src/routes/comment');
-const labelRouter = require('./src/routes/label');
-const videoLikeRouter = require('./src/routes/videoLike');
+const videoRouter = require('./routes/video');
+const userRouter = require('./routes/user');
+const commentRouter = require('./routes/comment');
+const labelRouter = require('./routes/label');
+const videoLikeRouter = require('./routes/videoLike');
 
 const app = express();
 const port = process.env.APP_PORT;

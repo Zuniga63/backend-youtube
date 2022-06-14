@@ -1,21 +1,21 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model } = require('mongoose');
 
 const videoLikeSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     videoId: {
       type: Schema.Types.ObjectId,
-      ref: "Video",
+      ref: 'Video',
       required: true,
     },
   },
   { timestamps: true }
 );
 
-const VideoLike = model("VideoLike", videoLikeSchema);
+const VideoLike = model('VideoLike', videoLikeSchema);
 
 module.exports = VideoLike;

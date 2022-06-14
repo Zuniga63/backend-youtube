@@ -5,10 +5,10 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node server",
+    "dev": "nodemon server",
     "prepare": "husky install",
-    "cloudpresets": "node src/utils/create-cloudinary-presets.js"
+    "cloudpresets": "node server/utils/create-cloudinary-presets.js"
   },
   "author": "Andres Zuñiga (https:github.com/Zuniga63)",
   "license": "ISC",

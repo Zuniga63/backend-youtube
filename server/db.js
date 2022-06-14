@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 function connect() {
   const host = process.env.DB_HOST;
@@ -8,12 +8,12 @@ function connect() {
 
   mongoose.connect(uri);
 
-  mongoose.connection.once("open", () => {
+  mongoose.connection.once('open', () => {
     console.log(`Connection with mongo in ${host}:${port} with DB:${db}`);
   });
 
-  mongoose.connection.on("error", (err) => {
-    console.log("Something went wrong!", err);
+  mongoose.connection.on('error', (err) => {
+    console.log('Something went wrong!', err);
   });
 
   return mongoose.connection;
