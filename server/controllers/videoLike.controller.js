@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const Video = require('../models/video.model');
 const VideoLike = require('../models/videoLike.model');
+const sendError = require('../utils/sendError');
 
 module.exports = {
   /**
@@ -8,8 +9,12 @@ module.exports = {
    * @param {response} res
    */
   async list(req, res) {
-    const likes = await VideoLike.find();
-    res.status(200).json({ likes });
+    try {
+      const likes = await VideoLike.find();
+      res.status(200).json({ likes });
+    } catch (error) {
+      sendError(error, res);
+    }
   },
   /**
    * @param {request} req
@@ -47,8 +52,7 @@ module.exports = {
       await user.save({ validateBeforeSave: false });
       res.status(201).json({ message: 'OK' });
     } catch (error) {
-      console.log(error);
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   /**
@@ -66,8 +70,7 @@ module.exports = {
 
       res.status(200).json({ message: 'Like remove' });
     } catch (error) {
-      console.log(error);
-      res.status(502).end();
+      sendError(error, res);
     }
   },
 };

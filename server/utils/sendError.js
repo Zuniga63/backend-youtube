@@ -24,7 +24,9 @@ const sendError = (error, res) => {
     }
   }
 
-  res.status(500).json(error);
+  res
+    .status(500)
+    .json({ message: 'Internal server Error.', data: error.message });
 };
 
 module.exports = sendError;

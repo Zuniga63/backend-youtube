@@ -1,6 +1,7 @@
 const Label = require('../models/label.model');
 const Video = require('../models/video.model');
 const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
+const sendError = require('../utils/sendError');
 
 module.exports = {
   async list(_, res) {
@@ -8,7 +9,7 @@ module.exports = {
       const labels = await Label.find();
       res.status(200).json({ labels });
     } catch (error) {
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   async create(req, res) {
@@ -28,7 +29,7 @@ module.exports = {
       });
       res.status(201).json({ message: 'Label was create', label });
     } catch (error) {
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   async show(req, res) {
@@ -48,7 +49,7 @@ module.exports = {
 
       res.status(200).json({ label });
     } catch (error) {
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   async update(req, res) {
@@ -79,7 +80,7 @@ module.exports = {
 
       res.status(200).json({ label, message: 'Etiqueta actualizada.' });
     } catch (error) {
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   async destroy(req, res) {
@@ -113,8 +114,7 @@ module.exports = {
 
       res.status(200).json({ label: labelDeleted, message: 'label deleted.' });
     } catch (error) {
-      console.log(error);
-      res.status(502).json(error.message);
+      sendError(error, res);
     }
   },
 };

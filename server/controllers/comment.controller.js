@@ -53,17 +53,21 @@ module.exports = {
    * @param {object} req
    * @param {object} res
    */
-  async videoComments(req, res) {
+  async getVideoComments(req, res) {
     const { videoId } = req.params;
 
-    const comments = await Comment.find({ videoId })
-      .sort('createdAt')
-      .populate({ path: 'user', select: 'id firstName lastName avatar' });
+    try {
+      const comments = await Comment.find({ videoId })
+        .sort('createdAt')
+        .populate({ path: 'user', select: 'id firstName lastName avatar' });
 
-    res.status(200).json({
-      message: 'Ok',
-      comments,
-    });
+      res.status(200).json({
+        message: 'Ok',
+        comments,
+      });
+    } catch (error) {
+      sendError(error, res);
+    }
   },
   async userComments(req, res) {
     const userId = req.user;
@@ -86,8 +90,7 @@ module.exports = {
         comments,
       });
     } catch (error) {
-      console.log(error);
-      res.status(500).end();
+      sendError(error, res);
     }
   },
   async destroy(req, res) {
@@ -112,9 +115,7 @@ module.exports = {
 
       res.status(200).json({ message: 'comment deleted', data: comment });
     } catch (err) {
-      res
-        .status(400)
-        .json({ message: 'Comment could not be deleted', data: err });
+      sendError(err, res);
     }
   },
   async update(req, res) {
