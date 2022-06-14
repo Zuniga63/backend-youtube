@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 
@@ -23,6 +24,7 @@ connect();
 
 app.use(express.json());
 app.use(cors());
+app.use(morgan('dev'));
 
 app.use('/videos', videoRouter);
 app.use('/labels', labelRouter);
