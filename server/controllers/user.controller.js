@@ -93,6 +93,7 @@ module.exports = {
           avatar: user.avatarUrl,
           email: user.email,
         },
+        other: user,
       });
     } catch (err) {
       res.status(400).json({ message: 'User could not login', data: err });

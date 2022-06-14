@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+/**
+ * Se habilita el envió de las variables virtuales
+ */
+mongoose.set('toJSON', { virtuals: true });
+
 function connect() {
   const host = process.env.DB_HOST;
   const port = process.env.DB_PORT;
