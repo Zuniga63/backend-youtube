@@ -38,6 +38,16 @@ const videoSchema = new Schema(
   }
 );
 
+videoSchema.virtual('user', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true,
+});
+
+videoSchema.set('toObject', { virtuals: true });
+videoSchema.set('toJSON', { virtuals: true });
+
 // middleware to delete comments from the collections comments of the deleted video
 videoSchema.pre('deleteOne', async function cascadeOnDelete(next) {
   try {

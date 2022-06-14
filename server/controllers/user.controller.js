@@ -1,16 +1,15 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-underscore-dangle */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
+const sendError = require('../utils/sendError');
 
 module.exports = {
   async list(req, res) {
     try {
       const users = await User.find();
       res.status(200).json({ message: 'Users found', data: users });
-    } catch (err) {
-      res.status(404).json({ message: 'Users not found' });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -18,6 +17,10 @@ module.exports = {
     try {
       const userId = req.user;
       const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
       res.status(200).json({
         message: 'User found',
         user: {
@@ -26,8 +29,8 @@ module.exports = {
           email: user.email,
         },
       });
-    } catch (err) {
-      res.status(404).json({ message: 'User not found', data: err });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -37,7 +40,8 @@ module.exports = {
       const { avatar } = req.body;
 
       if (password !== confirmPassword) {
-        return res.status(403).json({ message: 'Contraseñas no coinciden' });
+        res.status(403).json({ message: 'Contraseñas no coinciden' });
+        return;
       }
       const encPassword = await bcrypt.hash(password, 8);
 
@@ -60,8 +64,8 @@ module.exports = {
           email: user.email,
         },
       });
-    } catch (err) {
-      res.status(400).json({ message: 'User could not be created', data: err });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -93,21 +97,23 @@ module.exports = {
           avatar: user.avatarUrl,
           email: user.email,
         },
+        other: user,
       });
-    } catch (err) {
-      res.status(400).json({ message: 'User could not login', data: err });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
   async update(req, res) {
     try {
       const userId = req.user;
+      // ! Ojo que se puede cambiar el password aquí
       const user = await User.findByIdAndUpdate(userId, req.body, {
         new: true,
       });
-      res.status(200).json({ message: 'User updated', data: user });
-    } catch (err) {
-      res.status(400).json({ message: 'User could not be updated', data: err });
+      res.status(200).json({ message: 'User updated', user });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -115,10 +121,10 @@ module.exports = {
     try {
       const userId = req.user;
 
-      const userDeleted = await User.findByIdAndDelete(userId);
-      res.status(200).json({ message: 'User deleted', data: userDeleted });
-    } catch (err) {
-      res.status(400).json({ message: 'User could not be deleted', data: err });
+      await User.findByIdAndDelete(userId);
+      res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 };

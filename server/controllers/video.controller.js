@@ -3,37 +3,47 @@ const User = require('../models/user.model');
 const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
 const Label = require('../models/label.model');
 const VideoLike = require('../models/videoLike.model');
+const sendError = require('../utils/sendError');
 
 /**
  * @param {Array} labelNames -  Arreglo con los nombres de las etiquetas a crear o buscar.
  * @returns
  */
 const findOrCreateLabels = async (labelNames = []) => {
-  const labels = [];
-  const errors = [];
+  let labels = [];
+  let errors = [];
 
-  if (labelNames && labelNames.length > 0) {
-    await Promise.all(
-      labelNames.map(async (name) => {
-        const slug = createSlug(name.trim());
+  try {
+    if (labelNames && labelNames.length > 0) {
+      await Promise.all(
+        labelNames.map(async (name) => {
+          const slug = createSlug(name.trim());
 
-        const label = await Label.findOne({ slug });
+          const label = await Label.findOne({ slug });
 
-        if (label) {
-          labels.push(label);
-        } else {
-          const newLabel = await Label.create({
-            name: normalizeLabelName(name),
-            slug: createSlug(name),
-          });
-          if (newLabel) {
-            labels.push(newLabel);
+          if (label) {
+            labels.push(label);
           } else {
-            errors.push(name);
+            const newLabel = await Label.create({
+              name: normalizeLabelName(name),
+              slug: createSlug(name),
+            });
+            if (newLabel) {
+              labels.push(newLabel);
+            } else {
+              errors.push(name);
+            }
           }
-        }
-      })
-    );
+        })
+      );
+    }
+  } catch (error) {
+    console.group('findOrCreate');
+    console.log(error);
+    console.groupEnd();
+  } finally {
+    labels = [];
+    errors = [];
   }
   return { labels, errors };
 };
@@ -42,11 +52,11 @@ module.exports = {
   async list(req, res) {
     try {
       const videos = await Video.find()
-        .populate('userId', 'firstName lastName email avatar')
+        .populate('user', 'firstName lastName email avatar')
         .populate('labels', 'name slug');
       res.status(200).json({ message: 'Videos found', videos });
-    } catch (err) {
-      res.status(404).json({ message: 'Videos nor found' });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -96,10 +106,8 @@ module.exports = {
       };
 
       res.status(200).json({ message: 'Video found', video: videoData });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: 'Internal server Error.', data: err.message });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -153,13 +161,8 @@ module.exports = {
         video,
         labelErrors,
       });
-    } catch (err) {
-      if (err.name === 'ValidationError') {
-        res.status(406).json(err);
-        return;
-      }
-      console.log(err);
-      res.status(502).end();
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -180,10 +183,8 @@ module.exports = {
       });
 
       res.status(200).json({ message: 'video updated', data: videoUpdated });
-    } catch (err) {
-      res
-        .status(400)
-        .json({ message: 'Video could not be updated', data: err });
+    } catch (error) {
+      sendError(error, res);
     }
   },
 
@@ -242,8 +243,7 @@ module.exports = {
         labelUpdates: labelUpdates.length,
       });
     } catch (error) {
-      console.log(error);
-      res.status(502).json(error.message);
+      sendError(error, res);
     }
   },
 };

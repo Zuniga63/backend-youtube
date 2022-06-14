@@ -1,7 +1,7 @@
-const { request, response } = require("express");
-const User = require("../models/user.model");
-const Video = require("../models/video.model");
-const VideoLike = require("../models/videoLike.model");
+const User = require('../models/user.model');
+const Video = require('../models/video.model');
+const VideoLike = require('../models/videoLike.model');
+const sendError = require('../utils/sendError');
 
 module.exports = {
   /**
@@ -9,8 +9,12 @@ module.exports = {
    * @param {response} res
    */
   async list(req, res) {
-    const likes = await VideoLike.find();
-    res.status(200).json({ likes });
+    try {
+      const likes = await VideoLike.find();
+      res.status(200).json({ likes });
+    } catch (error) {
+      sendError(error, res);
+    }
   },
   /**
    * @param {request} req
@@ -22,34 +26,33 @@ module.exports = {
 
     try {
       if (await VideoLike.exists({ videoId, userId })) {
-        res.status(200).json({ message: "Ok" });
+        res.status(200).json({ message: 'Ok' });
         return;
       }
 
       const video = await Video.findById(videoId);
       if (!video) {
-        res.status(404).json({ message: "Video no encontrado." });
+        res.status(404).json({ message: 'Video no encontrado.' });
         return;
       }
 
       const user = await User.findById(userId);
       if (!user) {
-        res.status(404).json({ message: "Usuario no encontrado." });
+        res.status(404).json({ message: 'Usuario no encontrado.' });
         return;
       }
 
       const like = await VideoLike.create({ userId: user, videoId: video });
 
-      //Se agrega los likes a las instancias
+      // Se agrega los likes a las instancias
       video.likes.push(like);
       user.likes.push(like);
 
       await video.save({ validateBeforeSave: false });
       await user.save({ validateBeforeSave: false });
-      res.status(201).json({ message: "OK" });
+      res.status(201).json({ message: 'OK' });
     } catch (error) {
-      console.log(error);
-      res.status(502).json(error);
+      sendError(error, res);
     }
   },
   /**
@@ -65,10 +68,9 @@ module.exports = {
         await VideoLike.deleteOne({ videoId, userId });
       }
 
-      res.status(200).json({ message: "Like remove" });
+      res.status(200).json({ message: 'Like remove' });
     } catch (error) {
-      console.log(error);
-      res.status(502).end();
+      sendError(error, res);
     }
   },
 };
