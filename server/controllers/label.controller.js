@@ -4,9 +4,13 @@ const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
 const sendError = require('../utils/sendError');
 
 module.exports = {
-  async list(_, res) {
+  async list(req, res) {
+    const { page = 1, limit = 10 } = req.query;
     try {
-      const labels = await Label.find();
+      const labels = await Label.find()
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .exec();
       res.status(200).json({ labels });
     } catch (error) {
       sendError(error, res);
