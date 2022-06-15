@@ -151,7 +151,11 @@ module.exports = {
       },
       { $skip: (page - 1) * limit },
       { $limit: limit * 1 },
-    ]).exec(function (err, results) {
+    ]).exec(function (error, results) {
+      if (error) {
+        sendError(error);
+        return;
+      }
       res.status(200).json({ message: 'Video found', results });
     });
   },
