@@ -23,7 +23,6 @@ module.exports = {
   async create(req, res) {
     const { videoId } = req.params;
     const userId = req.user;
-
     try {
       if (await VideoLike.exists({ videoId, userId })) {
         res.status(200).json({ message: 'Ok' });
