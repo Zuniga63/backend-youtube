@@ -1,3 +1,4 @@
+/* eslint-disable prefer-arrow-callback */
 const Video = require('../models/video.model');
 const User = require('../models/user.model');
 const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
@@ -9,6 +10,12 @@ const sendError = require('../utils/sendError');
  * @param {Array} labelNames -  Arreglo con los nombres de las etiquetas a crear o buscar.
  * @returns
  */
+
+// function to implement fuzzy search
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 const findOrCreateLabels = async (labelNames = []) => {
   let labels = [];
   let errors = [];
@@ -73,7 +80,8 @@ module.exports = {
 
       // Se recupera el video
       const video = await Video.findById(videoId)
-        .populate('userId', 'firstName email avatar')
+        .populate('labels', 'name slug')
+        .populate('userId', 'firstName lastName email avatar')
         .populate({
           path: 'comments',
           select: 'commentBody',
@@ -111,6 +119,46 @@ module.exports = {
     }
   },
 
+  async search(req, res) {
+    const { search, page = 1, limit = 10 } = req.query;
+    // const { search } = req.query;
+    const fuzzySearch = new RegExp(escapeRegex(search), 'gi');
+    Video.aggregate([
+      {
+        $lookup: {
+          from: 'labels',
+          localField: 'labels',
+          foreignField: '_id',
+          as: 'labels',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+      {
+        $match: {
+          $or: [
+            { title: { $regex: fuzzySearch } },
+            { 'labels.name': { $regex: fuzzySearch } },
+          ],
+        },
+      },
+      { $skip: (page - 1) * limit },
+      { $limit: limit * 1 },
+    ]).exec(function (error, results) {
+      if (error) {
+        sendError(error);
+        return;
+      }
+      res.status(200).json({ message: 'Video found', results });
+    });
+  },
   /**
    * @param {request} req
    * @param {response} res
