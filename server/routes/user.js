@@ -9,6 +9,11 @@ router.route('/signup').post(userControllers.signup);
 router.route('/signin').post(userControllers.signin);
 
 router.route('/edituser').put(userAuth, userControllers.update);
+router.route('/changepassword').put(userAuth, userControllers.changepassword);
 router.route('/deleteuser').delete(userAuth, userControllers.destroy);
+router
+  .route('/recover-password')
+  .put(userAuth, userControllers.recoverpassword);
+router.route('/getemail').post(userControllers.getemail);
 
 module.exports = router;
