@@ -4,6 +4,7 @@ const { userAuth } = require('../middlewares/userAuth.middleware');
 const videoController = require('../controllers/video.controller');
 
 router.route('/').get(videoController.list);
+router.route('/results').get(videoController.search);
 router.route('/:videoId').get(videoController.show);
 
 router.route('/').post(userAuth, formData, videoController.create);
