@@ -81,12 +81,7 @@ module.exports = {
       // Se recupera el video
       const video = await Video.findById(videoId)
         .populate('labels', 'name slug')
-        .populate('userId', 'firstName lastName email avatar')
-        .populate({
-          path: 'comments',
-          select: 'commentBody',
-          populate: { path: 'userId', select: 'name avatar' },
-        });
+        .populate('user', 'firstName lastName email avatar');
 
       if (!video) {
         res.status(404).json({ message: 'video not found.' });
