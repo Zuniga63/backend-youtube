@@ -33,7 +33,7 @@ module.exports = {
         return;
       }
 
-      const comment = await Comment.create({
+      let comment = await Comment.create({
         userId,
         videoId,
         body: commentBody,
@@ -41,6 +41,10 @@ module.exports = {
 
       video.comments.push(comment._id);
       await video.save({ validateBeforeSave: false });
+      comment = await comment.populate({
+        path: 'user',
+        select: 'id firstName lastName avatar',
+      });
 
       res.status(201).json({ message: 'Ok', comment });
     } catch (err) {
