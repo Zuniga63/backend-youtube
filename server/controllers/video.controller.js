@@ -17,8 +17,8 @@ function escapeRegex(text) {
 }
 
 const findOrCreateLabels = async (labelNames = []) => {
-  let labels = [];
-  let errors = [];
+  const labels = [];
+  const errors = [];
 
   try {
     if (labelNames && labelNames.length > 0) {
@@ -48,10 +48,8 @@ const findOrCreateLabels = async (labelNames = []) => {
     console.group('findOrCreate');
     console.log(error);
     console.groupEnd();
-  } finally {
-    labels = [];
-    errors = [];
   }
+
   return { labels, errors };
 };
 
@@ -178,6 +176,8 @@ module.exports = {
       const { labels, errors: labelErrors } = await findOrCreateLabels(
         JSON.parse(labelNames)
       );
+
+      console.log(labels);
 
       const video = await Video.create({
         title,
