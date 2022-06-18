@@ -61,10 +61,17 @@ module.exports = {
   async destroy(req, res) {
     const { videoId } = req.params;
     const userId = req.user;
-
     try {
       if (await VideoLike.exists({ videoId, userId })) {
+        const likeId = await VideoLike.exists({ videoId, userId });
         await VideoLike.deleteOne({ videoId, userId });
+        const extractId = likeId._id;
+        const string = extractId.toString();
+        const video = await Video.findById(videoId);
+        video.likes = video.likes.filter(
+          (item) => item._id.toString() !== string
+        );
+        await video.save({ validateBeforeSave: false });
       }
 
       res.status(200).json({ message: 'Like remove' });
