@@ -111,6 +111,7 @@ module.exports = {
           name: user.firstName,
           avatar: user.avatarUrl,
           email: user.email,
+          likes: user.likes,
         },
         other: user,
       });

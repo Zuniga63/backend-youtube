@@ -23,33 +23,36 @@ module.exports = {
   async create(req, res) {
     const { videoId } = req.params;
     const userId = req.user;
+    const userID = await User.findById(userId);
+    const video = await Video.findById(videoId);
     try {
-      if (await VideoLike.exists({ videoId, userId })) {
-        res.status(200).json({ message: 'Ok' });
-        return;
-      }
-
-      const video = await Video.findById(videoId);
       if (!video) {
         res.status(404).json({ message: 'Video no encontrado.' });
         return;
       }
 
-      const user = await User.findById(userId);
-      if (!user) {
+      if (!userID) {
         res.status(404).json({ message: 'Usuario no encontrado.' });
         return;
       }
+      if (await VideoLike.exists({ videoId, userId })) {
+        const like = await VideoLike.create({ userId: userID, videoId: video });
 
-      const like = await VideoLike.create({ userId: user, videoId: video });
+        video.likes.push(like);
+        userID.likes.push(like);
 
-      // Se agrega los likes a las instancias
-      video.likes.push(like);
-      user.likes.push(like);
+        await video.save({ validateBeforeSave: false });
+        await userID.save({ validateBeforeSave: false });
+      }
 
-      await video.save({ validateBeforeSave: false });
-      await user.save({ validateBeforeSave: false });
-      res.status(201).json({ message: 'OK' });
+      res.status(201).json({
+        user: {
+          name: userID.firstName,
+          avatar: userID.avatarUrl,
+          email: userID.email,
+          likes: userID.likes,
+        },
+      });
     } catch (error) {
       sendError(error, res);
     }
@@ -61,20 +64,35 @@ module.exports = {
   async destroy(req, res) {
     const { videoId } = req.params;
     const userId = req.user;
+    const userID = await User.findById(userId);
     try {
       if (await VideoLike.exists({ videoId, userId })) {
         const likeId = await VideoLike.exists({ videoId, userId });
         await VideoLike.deleteOne({ videoId, userId });
         const extractId = likeId._id;
         const string = extractId.toString();
+
         const video = await Video.findById(videoId);
         video.likes = video.likes.filter(
           (item) => item._id.toString() !== string
         );
         await video.save({ validateBeforeSave: false });
+
+        const user = await User.findById(userId);
+        user.likes = user.likes.filter(
+          (item) => item._id.toString() !== string
+        );
+        await user.save({ validateBeforeSave: false });
       }
 
-      res.status(200).json({ message: 'Like remove' });
+      res.status(201).json({
+        user: {
+          name: userID.firstName,
+          avatar: userID.avatarUrl,
+          email: userID.email,
+          likes: userID.likes,
+        },
+      });
     } catch (error) {
       sendError(error, res);
     }
