@@ -23,27 +23,27 @@ module.exports = {
   async create(req, res) {
     const { videoId } = req.params;
     const userId = req.user;
-    const userID = await User.findById(userId);
-    const video = await Video.findById(videoId);
+
     try {
-      if (!video) {
+      if (!videoId) {
         res.status(404).json({ message: 'Video no encontrado.' });
         return;
       }
+      const video = await Video.findById(videoId);
 
-      if (!userID) {
+      if (!userId) {
         res.status(404).json({ message: 'Usuario no encontrado.' });
         return;
       }
-      if (await VideoLike.exists({ videoId, userId })) {
-        const like = await VideoLike.create({ userId: userID, videoId: video });
+      const userID = await User.findById(userId);
 
-        video.likes.push(like);
-        userID.likes.push(like);
+      const like = await VideoLike.create({ userId: userID, videoId: video });
 
-        await video.save({ validateBeforeSave: false });
-        await userID.save({ validateBeforeSave: false });
-      }
+      video.likes.push(like);
+      userID.likes.push(like);
+
+      await video.save({ validateBeforeSave: false });
+      await userID.save({ validateBeforeSave: false });
 
       res.status(201).json({
         user: {
