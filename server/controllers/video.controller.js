@@ -17,8 +17,8 @@ function escapeRegex(text) {
 }
 
 const findOrCreateLabels = async (labelNames = []) => {
-  let labels = [];
-  let errors = [];
+  const labels = [];
+  const errors = [];
 
   try {
     if (labelNames && labelNames.length > 0) {
@@ -48,10 +48,8 @@ const findOrCreateLabels = async (labelNames = []) => {
     console.group('findOrCreate');
     console.log(error);
     console.groupEnd();
-  } finally {
-    labels = [];
-    errors = [];
   }
+
   return { labels, errors };
 };
 
@@ -81,12 +79,7 @@ module.exports = {
       // Se recupera el video
       const video = await Video.findById(videoId)
         .populate('labels', 'name slug')
-        .populate('userId', 'firstName lastName email avatar')
-        .populate({
-          path: 'comments',
-          select: 'commentBody',
-          populate: { path: 'userId', select: 'name avatar' },
-        });
+        .populate('user', 'firstName lastName email avatar');
 
       if (!video) {
         res.status(404).json({ message: 'video not found.' });
@@ -183,6 +176,8 @@ module.exports = {
       const { labels, errors: labelErrors } = await findOrCreateLabels(
         JSON.parse(labelNames)
       );
+
+      console.log(labels);
 
       const video = await Video.create({
         title,
