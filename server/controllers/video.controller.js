@@ -105,6 +105,7 @@ module.exports = {
         likes: video.likes.length,
         likesIds: video.likes,
         userLikeVideo,
+        visits: video.visits,
       };
 
       res.status(200).json({ message: 'Video found', video: videoData });
@@ -227,6 +228,35 @@ module.exports = {
       });
 
       res.status(200).json({ message: 'video updated', data: videoUpdated });
+    } catch (error) {
+      sendError(error, res);
+    }
+  },
+
+  /**
+   * @param {request} req
+   * @param {response} res
+   */
+  async views(req, res) {
+    try {
+      const { videoId } = req.params;
+      const userId = req.user;
+
+      if (!videoId) {
+        res.status(404).json({ message: 'Video no encontrado.' });
+        return;
+      }
+      const video = await Video.findById(videoId);
+
+      if (!userId) {
+        video.visits.push('Anonimus');
+        await video.save({ validateBeforeSave: false });
+        res.status(201);
+      }
+      const user = await User.findById(userId);
+      video.visits.push(user);
+      await video.save({ validateBeforeSave: false });
+      res.status(201);
     } catch (error) {
       sendError(error, res);
     }

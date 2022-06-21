@@ -24,7 +24,7 @@ const videoSchema = new Schema(
       type: String,
       required: true,
     },
-    visits: Number,
+    visits: Array,
     labels: [{ type: Schema.Types.ObjectId, ref: 'Label' }],
     comments: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
