@@ -103,6 +103,7 @@ module.exports = {
       const videoData = {
         ...video.toObject(),
         likes: video.likes.length,
+        likesIds: video.likes,
         userLikeVideo,
       };
 
