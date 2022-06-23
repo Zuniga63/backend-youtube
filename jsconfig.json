@@ -3,6 +3,6 @@
     "module": "commonjs",
     "target": "es6"
   },
-  "include": ["server/**/*"],
+  "include": ["server/**/*", "index.js"],
   "exclude": ["node_modules"]
 }
