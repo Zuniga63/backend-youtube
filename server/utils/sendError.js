@@ -5,28 +5,30 @@
  * @returns
  */
 const sendError = (error, res) => {
-  console.log(typeof error, error.name);
-  // ! Aquí debe ir el codigo para escribir el log.
-  console.log(error);
+  const { name: errorName, message } = error;
+  let code = 500;
+  const info = { message, ok: false };
 
-  if (error.name === 'ValidationError') {
-    res.status(406).json(error);
-    return;
-  }
-
-  if (error.name === 'CastError') {
+  if (errorName === 'ValidationError') {
+    code = 406;
+    info.error = error;
+  } else if (errorName === 'AuthError') code = 401;
+  else if (errorName === 'NotFoundError') code = 404;
+  else if (errorName === 'CastError') {
+    console.log(error);
     const { kind, stringValue, message: originalMessage } = error;
 
-    if (kind === 'ObjectId') {
-      const message = `El id "${stringValue}" no se puede convertir en ${kind}`;
-      res.status(406).json({ message, originalMessage });
-      return;
-    }
+    code = 406;
+    info.message =
+      kind === 'ObjectId'
+        ? `El id "${stringValue}" no se puede convertir en ${kind}`
+        : message;
+    info.originalMessage = originalMessage;
+  } else {
+    console.log(error);
+    info.message = 'Internal server Error.';
   }
-
-  res
-    .status(500)
-    .json({ message: 'Internal server Error.', data: error.message });
+  res.status(code).json(info);
 };
 
 module.exports = sendError;

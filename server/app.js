@@ -8,8 +8,9 @@ const { connect } = require('./db');
 const { transporter, verify } = require('./utils/mailer');
 
 const app = express();
-const port = process.env.APP_PORT;
-const host = process.env.APP_URL;
+app.set('port', process.env.PORT || process.env.APP_PORT);
+app.set('host', process.env.APP_URL);
+app.set('env', process.env.APP_ENV || 'local');
 
 connect();
 verify(transporter);
@@ -19,7 +20,4 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use('/', routes);
 
-app.listen(port, () => {
-  console.log(`App running in ${host}:${port}`);
-  console.log(`API Doc: ${host}:${port}/api-docs`);
-});
+module.exports = app;
