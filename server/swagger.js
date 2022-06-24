@@ -31,6 +31,10 @@ module.exports = {
       name: 'comments',
       description: 'Endpoint para administrar los comentarios',
     },
+    {
+      name: 'Auth',
+      description: 'End point para el registro y la autenticación de usuarios.',
+    },
   ],
   paths: {
     '/labels': {
@@ -750,20 +754,6 @@ module.exports = {
         ],
       }, // .end get
     },
-    '/user/signup': {
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    }, // .end /users/signup
-    '/user/signin': {
-      post: {
-        tags: ['user'],
-        summary: '',
-        produces: ['application/json'],
-      }, // .end get
-    }, // .end /users/signin
     '/user/logout': {
       post: {
         tags: ['user'],
@@ -836,6 +826,20 @@ module.exports = {
         produces: ['application/json'],
       }, // .end delete
     },
+    '/auth/local/signup': {
+      post: {
+        tags: ['Auth'],
+        summary: 'End point for register new user.',
+        produces: ['application/json'],
+      }, // .end get
+    }, // .end /users/signin
+    '/auth/local/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'End point for login user.',
+        produces: ['application/json'],
+      }, // .end get
+    }, // .end /users/logout
   }, // .end path
   definitions: {
     userInComment: {
