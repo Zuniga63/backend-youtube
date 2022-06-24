@@ -1,7 +1,10 @@
 const { Schema, model, models } = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const nameRegex = /[a-zA-Z]+/; // Just letters
 const emailRegex = /^[^@]+@[^@]+.[^@]+$/; // simply email validation
+const strongPass =
+  /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
 
 const userSchema = new Schema(
   {
@@ -32,7 +35,8 @@ const userSchema = new Schema(
       ],
     },
     password: {
-      required: true,
+      required: [true, 'La contraseña es requerida'],
+      match: [strongPass, 'La contraseña no es segura'],
       type: String,
     },
     likes: {
@@ -43,6 +47,35 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
+
+//----------------------------------------------------------
+// MIDLEWARES
+//----------------------------------------------------------
+
+userSchema.pre('save', function encryptPassword(next) {
+  const user = this; // This is the document
+  const saltRounds = 10; // number of salt before encryp
+
+  if (this.isModified('password') || this.isNew) {
+    // eslint-disable-next-line consistent-return
+    bcrypt.genSalt(saltRounds, (saltError, salt) => {
+      if (saltError) return next(saltError);
+
+      // eslint-disable-next-line consistent-return
+      bcrypt.hash(user.password, salt, (hashError, hash) => {
+        if (hashError) return next(hashError);
+        user.password = hash;
+        next();
+      });
+    });
+  } else {
+    next();
+  }
+});
+
+//----------------------------------------------------------
+// VIRTUALS
+//----------------------------------------------------------
 
 userSchema
   .virtual('fullName')

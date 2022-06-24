@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const sendError = require('../utils/sendError');
 const { transporter } = require('../utils/mailer');
+const NotFoundError = require('../utils/customErrors/NotFound');
+const ValidationError = require('../utils/customErrors/ValidationError');
 
 module.exports = {
   async list(req, res) {
@@ -36,90 +38,6 @@ module.exports = {
     }
   },
 
-  async signup(req, res) {
-    try {
-      const { password, confirmPassword, email, firstName } = req.body;
-      const { avatar } = req.body;
-
-      if (password !== confirmPassword) {
-        res.status(403).json({ message: 'Contraseñas no coinciden' });
-        return;
-      }
-      const encPassword = await bcrypt.hash(password, 8);
-
-      const user = await User.create({
-        ...req.body,
-        password: encPassword,
-        avatar,
-      });
-
-      await transporter.sendMail({
-        from: `"${process.env.MAIL_USERNAME}" <${process.env.MAIL_USER}>`,
-        to: email,
-        subject: 'Bienvenido al Clon de Youtube',
-        html: `
-        <div>
-        <p>Bienvenido,</p>
-        <h2>${firstName}</h2>
-        <p> a este proyecto llamado Clone YouTube</p>
-        </div>`,
-        text: `Bienvenido ${firstName} a este nuevo proyecto, gracias por acompañarnos`,
-      });
-
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
-        expiresIn: 60 * 60 * 24,
-      });
-
-      res.status(201).json({
-        message: 'User created',
-        token,
-        user: {
-          name: user.firstName,
-          avatar: user.avatarUrl,
-          email: user.email,
-        },
-      });
-    } catch (error) {
-      sendError(error, res);
-    }
-  },
-
-  async signin(req, res) {
-    try {
-      const { email, password } = req.body;
-
-      const user = await User.findOne({ email });
-
-      if (!user) {
-        throw new Error('Usuario o contraseña invalida');
-      }
-
-      const isValid = await bcrypt.compare(password, user.password);
-
-      if (!isValid) {
-        throw new Error('Usuario o contraseña invalida');
-      }
-
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
-        expiresIn: 60 * 60 * 24,
-      });
-
-      res.status(201).json({
-        message: 'User login',
-        token,
-        user: {
-          name: user.firstName,
-          avatar: user.avatarUrl,
-          email: user.email,
-          likes: user.likes,
-        },
-        other: user,
-      });
-    } catch (error) {
-      sendError(error, res);
-    }
-  },
-
   async update(req, res) {
     try {
       const userId = req.user;
@@ -137,25 +55,21 @@ module.exports = {
     try {
       const { password, newpassword, confirmPassword } = req.body;
       const userId = req.user;
-      const user = await User.findById(userId);
-      console.log(user);
-      if (!user) {
-        res.status(404).json({ message: 'User not find.' });
-        return;
-      }
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) {
-        res.status(403).json({ message: 'Password do not match' });
-        return;
-      }
-      if (newpassword !== confirmPassword) {
-        res.status(403).json({ message: 'Passwords do not match' });
-        return;
-      }
-      const encPassword = await bcrypt.hash(newpassword, 8);
 
-      user.password = encPassword;
-      await user.save({ validateBeforeSave: false });
+      if (!password || !newpassword || !confirmPassword)
+        throw new ValidationError('Todos los campos deben ser ingresados.');
+
+      if (newpassword !== confirmPassword)
+        throw new ValidationError('Las constraseñas no coinciden');
+
+      const user = await User.findById(userId);
+      if (!user) throw new NotFoundError('Usuario no encontrado.');
+
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) throw new ValidationError('Constraseña incorrecta.');
+
+      user.password = newpassword;
+      await user.save({ validateModifiedOnly: true });
 
       await transporter.sendMail({
         from: `"${process.env.MAIL_USERNAME}" <${process.env.MAIL_USER}>`,
@@ -215,22 +129,17 @@ module.exports = {
     try {
       const { email, password, confirmPassword } = req.body;
 
+      if (!email || !password || !confirmPassword)
+        throw new ValidationError('Todos los campos deben ser ingresados.');
+
+      if (password !== confirmPassword)
+        throw new ValidationError('Las constraseñas no coinciden');
+
       const user = await User.findOne({ email });
+      if (!user) throw new NotFoundError('Usuario no encontrado.');
 
-      if (!user) {
-        res.status(404).json({ message: 'User not find.' });
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        res.status(403).json({ message: 'Passwords do not match' });
-        return;
-      }
-
-      const encPassword = await bcrypt.hash(password, 8);
-
-      user.password = encPassword;
-      await user.save({ validateBeforeSave: false });
+      user.password = password;
+      await user.save({ validateModifiedOnly: true });
 
       await transporter.sendMail({
         from: `"${process.env.MAIL_USERNAME}" <${process.env.MAIL_USER}>`,
@@ -240,7 +149,7 @@ module.exports = {
         <div>
         <p>Hola,</p>
         <h2>${user.firstName}</h2>
-        <p> Has cambiado la contraseña en Clone YouTube</p>
+        <p> Has cambiado la contraseña en YouTube-Top</p>
         </div>`,
         text: `Hola ${user.firstName} has cambiado la contraseña`,
       });
