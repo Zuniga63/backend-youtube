@@ -55,14 +55,7 @@ const findOrCreateLabels = async (labelNames = []) => {
 
 module.exports = {
   async list(req, res) {
-    try {
-      const videos = await Video.find()
-        .populate('user', 'firstName lastName email avatar')
-        .populate('labels', 'name slug');
-      res.status(200).json({ message: 'Videos found', videos });
-    } catch (error) {
-      sendError(error, res);
-    }
+    res.json(res.paginatedResults);
   },
 
   /**
