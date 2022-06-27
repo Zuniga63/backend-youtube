@@ -8,6 +8,7 @@ const NotFoundError = require('../utils/customErrors/NotFound');
 const ValidationError = require('../utils/customErrors/ValidationError');
 const getUserData = require('../utils/getUserData');
 const AuthError = require('../utils/customErrors/AuthError');
+const Video = require('../models/video.model');
 
 module.exports = {
   async list(req, res) {
@@ -218,6 +219,20 @@ module.exports = {
 
       await User.findByIdAndDelete(userId);
       res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+      sendError(error, res);
+    }
+  },
+  async getVideos(req, res) {
+    try {
+      const user = await User.findById(req.user);
+      if (!user) throw new NotFoundError('Usuario no encontrado');
+
+      const videos = await Video.find({ userId: user.id })
+        .populate('labels', 'id, name')
+        .select('id title imageUrl likes comments visits');
+
+      res.status(200).json({ videos });
     } catch (error) {
       sendError(error, res);
     }
