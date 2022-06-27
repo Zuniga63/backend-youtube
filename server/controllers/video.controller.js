@@ -147,12 +147,13 @@ module.exports = {
       },
       { $skip: (page - 1) * limit },
       { $limit: limit * 1 },
-    ]).exec(function (error, results) {
+    ]).exec(async function (error, results) {
       if (error) {
         sendError(error);
         return;
       }
-      res.status(200).json({ message: 'Video found', results });
+      const populateResult = await Video.populate(results, { path: 'user' });
+      res.status(200).json({ message: 'Video found', results: populateResult });
     });
   },
   /**
