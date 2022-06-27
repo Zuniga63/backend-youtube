@@ -14,7 +14,6 @@ exports.userAuth = (req, res, next) => {
 
     const { id } = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    console.log(id);
     req.user = id;
 
     next();
