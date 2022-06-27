@@ -1,10 +1,14 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 const User = require('../models/user.model');
 const sendError = require('../utils/sendError');
 const { transporter } = require('../utils/mailer');
 const NotFoundError = require('../utils/customErrors/NotFound');
 const ValidationError = require('../utils/customErrors/ValidationError');
+const getUserData = require('../utils/getUserData');
+const AuthError = require('../utils/customErrors/AuthError');
+const Video = require('../models/video.model');
 
 module.exports = {
   async list(req, res) {
@@ -20,18 +24,11 @@ module.exports = {
     try {
       const userId = req.user;
       const user = await User.findById(userId);
-      if (!user) {
-        res.status(404).json({ message: 'User not found' });
-        return;
-      }
+      if (!user) throw new NotFoundError('Usuario no encontrado.');
+
       res.status(200).json({
         message: 'User found',
-        user: {
-          name: user.firstName,
-          avatar: user.avatarUrl,
-          email: user.email,
-          likes: user.likes,
-        },
+        user: getUserData(user),
       });
     } catch (error) {
       sendError(error, res);
@@ -41,11 +38,67 @@ module.exports = {
   async update(req, res) {
     try {
       const userId = req.user;
-      // ! Ojo que se puede cambiar el password aquí
-      const user = await User.findByIdAndUpdate(userId, req.body, {
-        new: true,
-      });
-      res.status(200).json({ message: 'User updated', user });
+      const { firstName, lastName, email } = req.body;
+
+      const user = await User.findById(userId);
+      if (!user) throw new AuthError('Usuario no encontrado.');
+
+      user.firstName = firstName;
+      user.lastName = lastName;
+      if (user.email !== email) user.email = email;
+
+      await user.save({ validateModifiedOnly: true });
+
+      res
+        .status(200)
+        .json({ message: 'User updated', user: getUserData(user) });
+    } catch (error) {
+      sendError(error, res);
+    }
+  },
+
+  async updateAvatar(req, res) {
+    const data = req.body;
+    const userId = req.user;
+
+    try {
+      const user = await User.findById(userId);
+      if (!user) throw new NotFoundError('Usuario no encontrado');
+
+      if (user.avatar?.publicId) {
+        const cloudRes = await cloudinary.uploader.destroy(
+          user.avatar?.publicId
+        );
+
+        if (cloudRes.result !== 'ok') throw new Error('No se pudo eliminar.');
+      }
+
+      user.avatar = data.image;
+      await user.save({ validateModifiedOnly: true });
+      res.status(200).json({ user: getUserData(user) });
+    } catch (error) {
+      sendError(error, res);
+    }
+  },
+
+  async removeAvatar(req, res) {
+    const userId = req.user;
+
+    try {
+      const user = await User.findById(userId);
+      if (!user) throw new NotFoundError('Usuario no encontrado');
+
+      if (user.avatar?.publicId) {
+        const cloudRes = await cloudinary.uploader.destroy(
+          user.avatar?.publicId
+        );
+
+        if (cloudRes.result !== 'ok') throw new Error('No se pudo eliminar.');
+      }
+
+      user.avatar = null;
+      await user.save({ validateModifiedOnly: true });
+      res.status(200).json({ user: getUserData(user) });
     } catch (error) {
       sendError(error, res);
     }
@@ -166,6 +219,20 @@ module.exports = {
 
       await User.findByIdAndDelete(userId);
       res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+      sendError(error, res);
+    }
+  },
+  async getVideos(req, res) {
+    try {
+      const user = await User.findById(req.user);
+      if (!user) throw new NotFoundError('Usuario no encontrado');
+
+      const videos = await Video.find({ userId: user.id })
+        .populate('labels', 'id, name')
+        .select('id title imageUrl likes comments visits');
+
+      res.status(200).json({ videos });
     } catch (error) {
       sendError(error, res);
     }

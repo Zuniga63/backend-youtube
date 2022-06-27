@@ -18,7 +18,7 @@ const userSchema = new Schema(
       type: String,
       match: [nameRegex, 'Nombre no debe contener numeros'],
     },
-    avatar: String,
+    avatar: Object,
     email: {
       type: String,
       required: true,
@@ -97,7 +97,7 @@ userSchema.virtual('avatarUrl').get(function get() {
     return `${uri}&name=${avatarName}`;
   }
 
-  return this.avatar;
+  return this.avatar.url;
 });
 
 const User = model('User', userSchema);
