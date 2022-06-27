@@ -5,6 +5,7 @@ const sendError = require('../utils/sendError');
 const { transporter } = require('../utils/mailer');
 const AuthError = require('../utils/customErrors/AuthError');
 const ValidationError = require('../utils/customErrors/ValidationError');
+const getUserData = require('../utils/getUserData');
 
 const sendMail = async (user) => {
   await transporter.sendMail({
@@ -20,13 +21,6 @@ const sendMail = async (user) => {
     text: `Bienvenido ${user.fullName} a este nuevo proyecto, gracias por acompañarnos`,
   });
 };
-
-const getUserData = (user) => ({
-  name: user.firstName,
-  avatar: user.avatarUrl,
-  email: user.email,
-  likes: user.likes,
-});
 
 module.exports = {
   async signup(req, res) {
