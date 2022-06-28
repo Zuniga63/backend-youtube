@@ -5,6 +5,7 @@ const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
 const Label = require('../models/label.model');
 const VideoLike = require('../models/videoLike.model');
 const sendError = require('../utils/sendError');
+const NotFoundError = require('../utils/customErrors/NotFound');
 
 /**
  * @param {Array} labelNames -  Arreglo con los nombres de las etiquetas a crear o buscar.
@@ -139,12 +140,13 @@ module.exports = {
       },
       { $skip: (page - 1) * limit },
       { $limit: limit * 1 },
-    ]).exec(function (error, results) {
+    ]).exec(async function (error, results) {
       if (error) {
         sendError(error);
         return;
       }
-      res.status(200).json({ message: 'Video found', results });
+      const populateResult = await Video.populate(results, { path: 'user' });
+      res.status(200).json({ message: 'Video found', results: populateResult });
     });
   },
   /**
@@ -233,23 +235,13 @@ module.exports = {
   async views(req, res) {
     try {
       const { videoId } = req.params;
-      const userId = req.user;
 
-      if (!videoId) {
-        res.status(404).json({ message: 'Video no encontrado.' });
-        return;
-      }
       const video = await Video.findById(videoId);
+      if (!videoId) throw new NotFoundError('Video no encontrado.');
 
-      if (!userId) {
-        video.visits.push('Anonimus');
-        await video.save({ validateBeforeSave: false });
-        res.status(201);
-      }
-      const user = await User.findById(userId);
-      video.visits.push(user);
+      video.visits.push('Anonimus');
       await video.save({ validateBeforeSave: false });
-      res.status(201);
+      res.status(201).send();
     } catch (error) {
       sendError(error, res);
     }

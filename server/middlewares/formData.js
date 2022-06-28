@@ -61,7 +61,6 @@ const formData = (req, res, next) => {
       (cloudErr, cloudRes) => {
         console.log(cloudErr);
         if (cloudErr) throw new Error('Something went wrong!');
-        console.log('response cloudinary', cloudRes);
 
         // Esto se ejecuta cuando los archivos son subidos a cloudinary.
         const {
@@ -70,9 +69,10 @@ const formData = (req, res, next) => {
           format,
           resource_type: type,
           secure_url: url,
+          public_id: publicId,
         } = cloudRes;
 
-        body[key] = { width, height, format, type, url };
+        body[key] = { width, height, format, type, url, publicId };
         uploadingFile = false;
         uploadingCount -= 1;
         done();
