@@ -1,9 +1,13 @@
 const router = require('express').Router();
 const formData = require('../middlewares/formData');
 const { userAuth } = require('../middlewares/userAuth.middleware');
+const {
+  paginatedResults,
+} = require('../middlewares/paginatedResults.middleware');
 const videoController = require('../controllers/video.controller');
+const Video = require('../models/video.model');
 
-router.route('/').get(videoController.list);
+router.route('/').get(paginatedResults(Video), videoController.list);
 router.route('/results').get(videoController.search);
 router.route('/:videoId').get(videoController.show);
 
