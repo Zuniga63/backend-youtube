@@ -228,6 +228,7 @@ module.exports = {
       res
         .status(200)
         .json({ message: 'User updated', user: getUserData(user) });
+
     } catch (error) {
       sendError(error, res);
     }
@@ -380,7 +381,7 @@ module.exports = {
         `,
         text: `Recuperando contraseña de ${user.firstName}, gracias por acompañarnos`,
       });
-      res.status(201).json({ message: 'Send Mail', user });
+      res.status(201).json({ message: 'Send Mail', user: getUserData(user) });
     } catch (error) {
       sendError(error, res);
     }
@@ -503,7 +504,7 @@ module.exports = {
         text: `Hola ${user.firstName} has cambiado la contraseña`,
       });
 
-      res.status(201).json({ message: 'Change Password Ok', user });
+      res.status(201).json({ message: 'Change Password Ok', user: getUserData(user) });
     } catch (error) {
       sendError(error, res);
     }
