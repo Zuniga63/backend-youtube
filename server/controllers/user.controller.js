@@ -127,7 +127,7 @@ module.exports = {
       await transporter.sendMail({
         from: `"${process.env.MAIL_USERNAME}" <${process.env.MAIL_USER}>`,
         to: user.email,
-        subject: 'Change Password in Clon of Youtube',
+        subject: 'Change Password in Youtube',
         html: `
         <!DOCTYPE html>
         <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -249,7 +249,7 @@ module.exports = {
       await transporter.sendMail({
         from: `"${process.env.MAIL_USERNAME}" <${process.env.MAIL_USER}>`,
         to: email,
-        subject: 'Recuperación contraseña de Clon de Youtube',
+        subject: 'Recuperación contraseña de Youtube',
         html: `
         <!DOCTYPE html>
         <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
