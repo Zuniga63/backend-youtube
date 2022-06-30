@@ -225,7 +225,9 @@ module.exports = {
         text: `Hola ${user.firstName} has cambiado la contraseña`,
       });
 
-      res.status(200).json({ message: 'User updated', user });
+      res
+        .status(200)
+        .json({ message: 'User updated', user: getUserData(user) });
     } catch (error) {
       sendError(error, res);
     }
