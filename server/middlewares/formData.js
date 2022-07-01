@@ -4,6 +4,7 @@ const cloudinary = require('cloudinary').v2;
 const PRESETS = {
   image: 'images_preset',
   video: 'video_preset',
+  avatar: 'avatar_preset',
 };
 
 cloudinary.config({
@@ -16,6 +17,7 @@ const formData = (req, res, next) => {
   // Se crea el cuerpo de body y la confg del busboy
   const body = {};
   const bb = busboy({ headers: req.headers });
+  const path = req.path.replace('/', '');
 
   // Se crean las variables que van a controlar la subida de los archivos.
   let uploadingFile = false;
@@ -46,6 +48,7 @@ const formData = (req, res, next) => {
     // Los siguientes parametros se actualizan de forma sincrona por cada archivo subido.
     uploadingFile = true;
     uploadingCount += 1;
+    let preset = null;
 
     /**
      * mimeType es un string de la forma image/jpg - image/gif - video/mp4
@@ -54,7 +57,10 @@ const formData = (req, res, next) => {
     const fileType = mimeType.split('/')[0];
 
     // Se crea esto para especificarle a cloudinary que preset usar segun el archivo.
-    const preset = PRESETS[fileType];
+    if (path === 'update-avatar') preset = PRESETS.avatar;
+    else {
+      preset = PRESETS[fileType];
+    }
 
     const cloud = cloudinary.uploader.upload_stream(
       { upload_preset: preset, resource_type: fileType },
@@ -64,15 +70,16 @@ const formData = (req, res, next) => {
 
         // Esto se ejecuta cuando los archivos son subidos a cloudinary.
         const {
+          public_id: publicId,
           width,
           height,
           format,
           resource_type: type,
           secure_url: url,
-          public_id: publicId,
+          duration,
         } = cloudRes;
 
-        body[key] = { width, height, format, type, url, publicId };
+        body[key] = { publicId, width, height, format, type, url, duration };
         uploadingFile = false;
         uploadingCount -= 1;
         done();

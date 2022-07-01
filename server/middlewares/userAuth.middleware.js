@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
 const AuthError = require('../utils/customErrors/AuthError');
 const sendError = require('../utils/sendError');

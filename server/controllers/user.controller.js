@@ -228,7 +228,6 @@ module.exports = {
       res
         .status(200)
         .json({ message: 'User updated', user: getUserData(user) });
-
     } catch (error) {
       sendError(error, res);
     }
@@ -504,7 +503,9 @@ module.exports = {
         text: `Hola ${user.firstName} has cambiado la contraseña`,
       });
 
-      res.status(201).json({ message: 'Change Password Ok', user: getUserData(user) });
+      res
+        .status(201)
+        .json({ message: 'Change Password Ok', user: getUserData(user) });
     } catch (error) {
       sendError(error, res);
     }
@@ -527,7 +528,7 @@ module.exports = {
 
       const videos = await Video.find({ userId: user.id })
         .populate('labels', 'id, name')
-        .select('id title imageUrl likes comments visits');
+        .select('id title image likes comments visits');
 
       res.status(200).json({ videos });
     } catch (error) {
