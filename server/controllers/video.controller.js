@@ -1,4 +1,5 @@
 /* eslint-disable prefer-arrow-callback */
+const jwt = require('jsonwebtoken');
 const Video = require('../models/video.model');
 const User = require('../models/user.model');
 const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
@@ -140,12 +141,20 @@ module.exports = {
       },
       { $skip: (page - 1) * limit },
       { $limit: limit * 1 },
-    ]).exec(async function (error, results) {
+    ]).exec(async function excecFunc(error, results) {
       if (error) {
         sendError(error);
         return;
       }
-      const populateResult = await Video.populate(results, { path: 'user' });
+
+      // Se rehidratan los documentos para recuperar las virtuales
+      const videos = results.map((doc) => Video.hydrate(doc));
+
+      // Se
+      const populateResult = await Video.populate(videos, {
+        path: 'user',
+        select: '-password -likes -videos -viewingHistory -email',
+      });
       res.status(200).json({ message: 'Video found', results: populateResult });
     });
   },
@@ -165,10 +174,7 @@ module.exports = {
 
       const userId = req.user;
       const user = await User.findById(userId);
-      if (!user) {
-        res.status(404).json({ message: 'Usuario no encontrado.' });
-        return;
-      }
+      if (!user) throw new NotFoundError('Usuario no encontrado');
 
       const { labels, errors: labelErrors } = await findOrCreateLabels(
         JSON.parse(labelNames)
@@ -179,8 +185,8 @@ module.exports = {
       const video = await Video.create({
         title,
         description,
-        imageUrl: imageInfo.url,
-        videoUrl: videoInfo.url,
+        image: imageInfo,
+        video: videoInfo,
         userId,
         labels,
       });
@@ -195,6 +201,10 @@ module.exports = {
       }
 
       await Promise.all(labelUpdates);
+
+      // Se guarda el video en el usuario
+      user.videos.push(video);
+      await user.save(updateOptions);
 
       res.status(201).json({
         message: 'Video creado exitosamente',
@@ -235,12 +245,37 @@ module.exports = {
   async views(req, res) {
     try {
       const { videoId } = req.params;
+      const { authorization } = req.headers;
 
       const video = await Video.findById(videoId);
       if (!videoId) throw new NotFoundError('Video no encontrado.');
 
-      video.visits.push('Anonimus');
+      video.visits += 1;
       await video.save({ validateBeforeSave: false });
+
+      /**
+       * Se agrega la funcionalidad para agregar el video visualizado
+       * al usuario.
+       * ? Este codigo se ejecuta si se envia el token y la verificaciones es correcta.
+       */
+      if (authorization) {
+        const [_, token] = authorization.split(' ');
+        if (token) {
+          jwt.verify(
+            token,
+            process.env.JWT_SECRET_KEY,
+            async function result(err, decoded) {
+              if (!err) {
+                const { id } = decoded;
+                const user = await User.findById(id);
+                user.viewingHistory.push(video);
+                await user.save({ validateBeforeSave: false });
+              }
+            }
+          );
+        }
+      }
+
       res.status(201).send();
     } catch (error) {
       sendError(error, res);
