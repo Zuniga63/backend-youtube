@@ -8,15 +8,7 @@ const { connect } = require('./db');
 const { transporter, verify } = require('./utils/mailer');
 
 const app = express();
-app.use(
-  cors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE, OPTIONS',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.set('port', process.env.PORT || process.env.APP_PORT);
 app.set('host', process.env.APP_URL);
