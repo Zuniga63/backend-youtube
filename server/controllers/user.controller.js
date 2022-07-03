@@ -1,14 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
-const User = require('../models/user.model');
-const sendError = require('../utils/sendError');
 const { transporter } = require('../utils/mailer');
+
+const User = require('../models/user.model');
+const Video = require('../models/video.model');
+const getUserData = require('../utils/getUserData');
+
+const sendError = require('../utils/sendError');
 const NotFoundError = require('../utils/customErrors/NotFound');
 const ValidationError = require('../utils/customErrors/ValidationError');
-const getUserData = require('../utils/getUserData');
 const AuthError = require('../utils/customErrors/AuthError');
-const Video = require('../models/video.model');
 
 module.exports = {
   async list(req, res) {
