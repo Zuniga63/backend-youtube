@@ -18,6 +18,10 @@ module.exports = {
   rules: {
     'prettier/prettier': RULES.ERROR,
     'no-underscore-dangle': [RULES.OFF],
+    'no-unused-vars': [
+      RULES.ERROR,
+      { argsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' },
+    ],
     'no-console': RULES.OFF,
   },
 };

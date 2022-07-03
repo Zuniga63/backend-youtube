@@ -16,15 +16,19 @@ const videoSchema = new Schema(
       required: true,
     },
     description: String,
-    videoUrl: {
-      type: String,
+    video: {
+      type: Object,
       required: true,
     },
-    imageUrl: {
-      type: String,
+    image: {
+      type: Object,
       required: true,
     },
-    visits: Array,
+    visits: {
+      type: Number,
+      require: false,
+      default: 0,
+    },
     labels: [{ type: Schema.Types.ObjectId, ref: 'Label' }],
     comments: {
       type: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
@@ -43,6 +47,14 @@ videoSchema.virtual('user', {
   localField: 'userId',
   foreignField: '_id',
   justOne: true,
+});
+
+videoSchema.virtual('videoUrl').get(function get() {
+  return this?.video?.url;
+});
+
+videoSchema.virtual('imageUrl').get(function get() {
+  return this?.image?.url;
 });
 
 videoSchema.set('toObject', { virtuals: true });

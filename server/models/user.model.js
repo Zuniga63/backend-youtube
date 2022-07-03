@@ -42,6 +42,12 @@ const userSchema = new Schema(
     likes: {
       type: [{ type: Schema.Types.ObjectId, ref: 'VideoLike' }],
     },
+    videos: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Video' }],
+    },
+    viewingHistory: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Video' }],
+    },
   },
   {
     timestamps: true,
