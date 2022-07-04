@@ -1,4 +1,5 @@
 module.exports = (user) => ({
+  id: user.id,
   name: user.fullName,
   firstName: user.firstName,
   lastName: user.lastName,
