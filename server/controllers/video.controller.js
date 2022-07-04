@@ -147,6 +147,10 @@ module.exports = {
         return;
       }
 
+      if (results.length === 0) {
+        res.status(200).json({ message: 'Video no encontrado.' });
+        return;
+      }
       // Se rehidratan los documentos para recuperar las virtuales
       const videos = results.map((doc) => Video.hydrate(doc));
 
