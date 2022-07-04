@@ -8,12 +8,14 @@ const sendError = (error, res) => {
   const { name: errorName, message } = error;
   let code = 500;
   const info = { message, ok: false };
+  console.log(error.name);
 
   if (errorName === 'ValidationError') {
     code = 406;
     info.error = error;
-  } else if (errorName === 'AuthError') code = 401;
-  else if (errorName === 'NotFoundError') code = 404;
+  } else if (errorName === 'AuthError' || errorName === 'TokenExpiredError') {
+    code = 401;
+  } else if (errorName === 'NotFoundError') code = 404;
   else if (errorName === 'CastError') {
     console.log(error);
     const { kind, stringValue, message: originalMessage } = error;

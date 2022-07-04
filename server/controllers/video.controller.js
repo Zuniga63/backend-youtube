@@ -1,5 +1,6 @@
 /* eslint-disable prefer-arrow-callback */
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 const Video = require('../models/video.model');
 const User = require('../models/user.model');
 const { createSlug, normalizeLabelName } = require('../utils/labelUtils');
@@ -7,6 +8,7 @@ const Label = require('../models/label.model');
 const VideoLike = require('../models/videoLike.model');
 const sendError = require('../utils/sendError');
 const NotFoundError = require('../utils/customErrors/NotFound');
+const AuthError = require('../utils/customErrors/AuthError');
 
 /**
  * @param {Array} labelNames -  Arreglo con los nombres de las etiquetas a crear o buscar.
@@ -147,6 +149,10 @@ module.exports = {
         return;
       }
 
+      if (results.length === 0) {
+        res.status(200).json({ message: 'Video no encontrado.' });
+        return;
+      }
       // Se rehidratan los documentos para recuperar las virtuales
       const videos = results.map((doc) => Video.hydrate(doc));
 
@@ -292,17 +298,26 @@ module.exports = {
       const userId = req.user;
 
       const video = await Video.findById(videoId);
-      if (!video) {
-        res.status(404).json({ message: 'Video no encontrado.' });
-        return;
-      }
+      if (!video) throw new NotFoundError('Video no encontrado.');
 
-      if (video.userId.toString() !== userId) {
-        res.status(403).json({ message: 'unauthorized user' });
-        return;
-      }
+      if (video.userId.toString() !== userId)
+        throw AuthError('Acción denegada.');
 
       await Video.deleteOne({ _id: videoId });
+
+      // Se eliminan los recursos en Cloudinary
+      if (video.image?.publicId) {
+        await cloudinary.uploader.destroy(video.image.publicId);
+      }
+
+      if (video.video?.publicId) {
+        console.log(video.video);
+        const resultss = await cloudinary.uploader.destroy(
+          video.video.publicId,
+          { resource_type: 'video' }
+        );
+        console.log(resultss);
+      }
 
       /**
        * * Esta es una forma de hacer peticiones asincronas en bucles

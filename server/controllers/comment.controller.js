@@ -117,7 +117,7 @@ module.exports = {
       );
       await video.save({ validateBeforeSave: false });
 
-      res.status(200).json({ message: 'comment deleted', data: comment });
+      res.status(200).json({ message: 'Comentario eliminado', comment });
     } catch (err) {
       sendError(err, res);
     }

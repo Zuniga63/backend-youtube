@@ -528,7 +528,7 @@ module.exports = {
 
       const videos = await Video.find({ userId: user.id })
         .populate('labels', 'id, name')
-        .select('id title image likes comments visits');
+        .select('id title description image likes comments visits');
 
       res.status(200).json({ videos });
     } catch (error) {
