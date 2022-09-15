@@ -1,3 +1,7 @@
+<link rel="stylesheet" href="editormd/css/editormd.css" />
+<div id="test-editor">
+    <textarea style="display:none;">### Editor.md
+
 # Backend YouTube Top-22
 
 **Express server RESTful API** that manages the upload of video and image content to storage web services such as Cloudinary and allows sharing said content with other users and visitors of the  platform.
@@ -41,3 +45,17 @@ This project use the next dependencies for dev
 swagger-ui-express is used for the documentation of the endpoints and these can be found in the path “/api-docs”
 
 ![api-docs](https://user-images.githubusercontent.com/50376585/190294648-64779f4f-40a3-4c72-9ef5-d50487a9e7cb.gif)
+
+    </textarea>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="editormd/editormd.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        var editor = editormd("test-editor", {
+            // width  : "100%",
+            // height : "100%",
+            path   : "editormd/lib/"
+        });
+    });
+</script>
