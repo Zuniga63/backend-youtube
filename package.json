@@ -1,7 +1,7 @@
 {
   "name": "backend-youtube",
   "version": "1.0.0",
-  "description": "backend for project YouTube Clone",
+  "description": "Express server RESTful API that manages the upload of video and image content to storage web services such as Cloudinary and allows sharing said content with other users and visitors of the platform.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
